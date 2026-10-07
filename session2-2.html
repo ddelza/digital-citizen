@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2차시 ② 프롬프트 실험하기 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.r { background: #d0ebff; border-radius: 4px; padding: 0 2px; }
+.c { background: #d3f9d8; border-radius: 4px; padding: 0 2px; }
+.t { background: #fff3bf; border-radius: 4px; padding: 0 2px; }
+.k { background: #ffd8e8; border-radius: 4px; padding: 0 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.76rem; margin: 6px 0; }
+.step { background: var(--bg); border-radius: 10px; padding: 8px 10px; margin: 6px 0; font-size: 0.84rem; line-height: 1.8; }
+.step .lb { display: block; font-size: 0.72rem; font-weight: 700; color: var(--accent); }
+.dc-group .dc-info:has(.builder), .dc-group .dc-info:has(.refrow) { background: none; border: none; padding: 0; margin: 4px 0; }
+.builder { background: #f2f4fa; border-radius: 10px; padding: 8px 10px; }
+.builder .bt { font-size: 0.76rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.builder input { margin: 3px 0; padding: 8px 10px; font-size: 0.84rem; }
+.builder .acts { display: flex; gap: 6px; margin-top: 4px; }
+.refrow { background: #f6f6f6; border: 1.5px dashed var(--border); border-radius: 10px; padding: 8px 10px; font-size: 0.82rem; line-height: 1.6; color: #555; }
+.refrow b { color: var(--accent); font-size: 0.74rem; display: block; }
+.tbl th { white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="concept">
+    <h3>💬 프롬프트란? (p.33)</h3>
+    <p style="margin:0">프롬프트는 사용자가 생성형 인공지능에 입력하는 <b>질문·지시·요청</b>이에요. 어떻게 구성하느냐에 따라 결과의 내용과 표현이 달라져요.</p>
+    <table class="tbl">
+      <tr><th>구성 요소</th><th>의미</th><th>예시</th></tr>
+      <tr><td><span class="r">역할</span></td><td>AI에게 부여할 역할이나 전문성 지정</td><td>너는 중학생을 가르치는 과학 선생님이야.</td></tr>
+      <tr><td><span class="c">맥락</span></td><td>상황·배경·조건 등 AI가 알아야 할 정보</td><td>나는 중학교 1학년이고, 오늘 수업에서 원소 기호를 배웠어.</td></tr>
+      <tr><td><span class="t">임무</span></td><td>AI에게 원하는 구체적인 작업 지시</td><td>산소와 탄소가 우리 주변 어디에 쓰이는지 흥미로운 사실을 알려줘.</td></tr>
+      <tr><td><span class="k">제약</span></td><td>결과물의 형식, 분량, 제외할 내용 등</td><td>쉬운 말로 각각 두 가지씩만 소개해 줘.</td></tr>
+    </table>
+    <p style="margin:0">💡 네 요소를 <b>모두 반드시 넣을 필요는 없어요.</b> 순서대로 쓸 필요도 없고, <b>목적과 상황에 맞게 필요한 요소를 골라</b> 써요.</p>
+  </div>
+
+  <div class="concept">
+    <h3>🧪 &lt;프롬프트 예시&gt; 기후 변화 카드 뉴스 (p.34)</h3>
+    <div class="legend"><span class="r">역할</span><span class="c">맥락</span><span class="t">임무</span><span class="k">제약</span></div>
+    <div class="step"><span class="lb">① 임무만</span><span class="t">기후 변화 카드 뉴스 만들어 줘.</span></div>
+    <div class="step"><span class="lb">② 임무 + 역할</span><span class="r">너는 환경 전문 그래픽 디자이너야.</span> <span class="t">기후 변화 카드 뉴스를 만들어 줘.</span></div>
+    <div class="step"><span class="lb">③ 임무 + 역할 + 맥락</span><span class="r">너는 환경 전문 그래픽 디자이너야.</span> <span class="c">나는 중학교 1학년이고 플라스틱 쓰레기 문제를 주제로 학교 환경 캠페인용 카드 뉴스를 만들어야 해. 또래 학생들이 쉽게 이해하고 행동할 수 있도록 도와 줘.</span> <span class="t">기후 변화 카드 뉴스를 만들어 줘.</span></div>
+    <div class="step"><span class="lb">④ 네 요소 모두</span><span class="r">너는 환경 전문 그래픽 디자이너야.</span> <span class="c">나는 중학교 1학년이고 플라스틱 쓰레기 문제를 주제로 학교 환경 캠페인용 카드 뉴스를 만들어야 해. 또래 학생들이 쉽게 이해하고 행동할 수 있도록 도와 줘.</span> <span class="t">카드 뉴스 5장의 제목과 핵심 내용을 제안해 줘.</span> <span class="k">각 카드는 두 문장 이내로, 중학생이 이해할 수 있는 쉬운 말로 써 줘.</span></div>
+  </div>
+
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+const TASK = '학교 축제 홍보 포스터에 들어갈 문구 아이디어를 모아 줘.';
+const BEST = ['기준(임무만)', '임무+역할', '임무+역할+맥락', '임무+역할+맥락+제약'];
+const FACT = ['역할', '맥락', '제약', '기타'];
+const ROWS = [
+  { n: 1, title: '1. 임무 + 역할', kinds: ['role'] },
+  { n: 2, title: '2. 임무 + 역할 + 맥락', kinds: ['role', 'ctx'] },
+  { n: 3, title: '3. 임무 + 역할 + 맥락 + 제약 (네 가지 요소 모두)', kinds: ['role', 'ctx', 'con'] },
+];
+const KIND = {
+  role: ['🔵 역할', '예) 너는 학교 행사를 홍보하는 포스터 디자이너야.'],
+  ctx: ['🟢 맥락', '예) 우리 학교는 중학교이고, 가을 축제에 친구들과 선생님이 많이 와.'],
+  con: ['🔴 제약', '예) 15자 이내 문구 5개, 쉬운 말로.'],
+};
+function builderHtml(r) {
+  return '<div class="builder" data-row="' + r.n + '"><div class="bt">🧩 프롬프트 만들기 도우미 (선택) — 칸을 채우면 아래 칸에 자동으로 이어 붙어요. 아래 칸은 직접 고쳐도 돼요.</div>' +
+    r.kinds.map(k => '<input type="text" data-kind="' + k + '" placeholder="' + KIND[k][0] + ' ' + KIND[k][1] + '">').join('') +
+    '<div class="acts"><button class="btn secondary small" data-copy="' + r.n + '" type="button">📋 복사</button><span class="dc-muted" style="align-self:center">복사해서 새 AI 대화창에 붙여 넣어요</span></div></div>';
+}
+const GROUPS = [
+  { title: '📝 활동 2-1. 프롬프트 만들기', fields: [
+    { type: 'info', html: '<b>과제:</b> 학교 축제 홍보 포스터에 들어갈 문구 아이디어를 모아야 해요. 기준 프롬프트에 역할·맥락·제약을 하나씩 더해 세 개의 프롬프트를 쓰고, 예상 결과와 적합성을 평가해 보세요.' },
+    { type: 'info', html: '<div class="refrow"><b>기준 · 임무만 (예시, 수정 불가)</b>프롬프트: 학교 축제 홍보 문구 만들어 줘<br>예상 결과: 어느 학교에나 어울릴 법한 평범한 문구가 나올 것 같다.<br>적합성 평가: 우리 학교 분위기와는 맞지 않을 수 있음.</div>' },
+    { type: 'info', html: '🔒 프롬프트에 <b>이름·친구 사진·계정 정보</b> 같은 개인정보는 넣지 않아요. 그리고 각 프롬프트는 <b>새 대화창</b>에서 입력해요.' },
+  ].concat(ROWS.reduce((a, r) => a.concat([
+    { type: 'info', html: '<b style="color:var(--accent)">' + r.title + '</b>' + builderHtml(r) },
+    { id: 'p' + r.n, type: 'textarea', short: r.title + ' 프롬프트', label: '프롬프트 내용 작성', rows: 3 },
+    { id: 'e' + r.n, type: 'textarea', short: r.title + ' 예상 결과', label: '예상 결과', rows: 2 },
+    { id: 'f' + r.n, type: 'textarea', short: r.title + ' 적합성 평가', label: '적합성 평가', rows: 2 },
+  ]), [])) },
+  { title: '🔁 활동 2-2. 실제 결과 비교하고 수정하기', fields: [
+    { type: 'info', html: '같은 AI 도구에 네 가지 프롬프트를 각각 <b>새 대화창</b>에 입력하고, 예상한 결과와 실제 결과를 비교해 보세요. 그중 하나를 골라 결과가 과제에 더 잘 맞도록 고친 뒤 새 대화창에 다시 입력해요.' },
+    { id: 'revised', type: 'textarea', short: '수정한 프롬프트', label: '수정한 프롬프트', rows: 3 },
+    { id: 'changed', type: 'textarea', short: '수정한 뒤 달라진 점', label: '수정한 뒤 달라진 점', rows: 3 },
+  ] },
+  { title: '🔍 활동 2-3. 비교하고 답하기', fields: [
+    { id: 'best', type: 'radio', short: '가장 잘 만든 프롬프트', label: '① 원하는 과제 결과를 가장 잘 만들어낸 프롬프트는?', options: BEST },
+    { id: 'factor', type: 'radio', short: '가장 큰 영향을 준 요소', label: '② 기준 프롬프트와 비교했을 때 결과에 가장 큰 영향을 준 요소는?', options: FACT },
+    { id: 'factorEtc', type: 'text', short: '기타 요소', label: '②-1 "기타"를 골랐다면 어떤 요소인지 적어요', placeholder: '기타를 고른 경우에만' },
+    { id: 'allFour', type: 'text', short: '네 요소를 모두 넣으면 항상 가장 알맞을까', label: '③ 프롬프트에 네 가지 요소를 모두 넣으면 모든 과제에서 항상 가장 알맞은 결과가 나올까? 그렇게 생각한 이유를 한 줄로 적어 보자.' },
+  ] },
+  { title: '🤝 활동 2-4. 인공지능과 나의 역할', fields: [
+    { id: 'aiHelped', type: 'textarea', short: 'AI가 도움이 된 일', label: '인공지능이 도움이 된 일 (한 가지)', rows: 2 },
+    { id: 'iJudged', type: 'textarea', short: '내가 직접 판단한 일', label: '내가 직접 판단한 일 (한 가지)', rows: 2 },
+  ] },
+];
+const ALL = DC.allFields({ groups: GROUPS }).filter(f => f.type !== 'info');
+
+// ---------- 프롬프트 만들기 도우미 ----------
+function compose(box) {
+  const g = k => { const i = box.querySelector('[data-kind="' + k + '"]'); return i ? i.value.trim() : ''; };
+  return [g('role'), g('ctx'), TASK, g('con')].filter(Boolean).join(' ');
+}
+document.addEventListener('input', e => {
+  const box = e.target.closest('.builder'); if (!box || e.isComposing) return;
+  const ta = document.querySelector('[data-fid="p' + box.dataset.row + '"]');
+  if (ta) ta.value = compose(box);
+});
+document.addEventListener('compositionend', e => {
+  const box = e.target.closest && e.target.closest('.builder'); if (!box) return;
+  const ta = document.querySelector('[data-fid="p' + box.dataset.row + '"]');
+  if (ta) ta.value = compose(box);
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-copy]'); if (!b) return;
+  const ta = document.querySelector('[data-fid="p' + b.dataset.copy + '"]');
+  if (!ta || !ta.value.trim()) { alert('복사할 프롬프트가 아직 없어요.'); return; }
+  DC.copy(ta.value, b);
+});
+
+DC.start({ title: '2차시 ② 활동 2 · 프롬프트 실험하기', subtitle: '요소를 하나씩 더하면 결과가 어떻게 달라질까?' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's2/prompt', title: '✏️ 프롬프트 실험 기록', groups: GROUPS,
+    required: ['p1', 'p2', 'p3', 'revised', 'changed', 'best', 'factor', 'allFour', 'aiHelped', 'iJudged'],
+    validate: a => a.factor === '기타' && !a.factorEtc ? '②에서 "기타"를 골랐다면 어떤 요소인지 적어 주세요.' : '',
+  });
+  DC.board({
+    mount: '#board', key: 's2/prompt', title: '🏆 우리 반 프롬프트 갤러리', sort: 'likes',
+    hint: '"가장 잘 고친 프롬프트"에 ❤️를 눌러 주세요. 구체적인 칭찬이나 질문은 댓글로!',
+    fields: ALL,
+    cardHtml: r => {
+      const a = r.answers, row = (t, v) => DC.isEmpty(v) ? '' : '<div class="dc-post-row"><b>' + t + '</b><div>' + DC.nl2br(v) + '</div></div>';
+      return row('수정한 프롬프트', a.revised) + row('수정한 뒤 달라진 점', a.changed) + row('내가 직접 판단한 일', a.iJudged) +
+        '<div class="dc-muted">가장 잘 만든 프롬프트: ' + DC.esc(a.best || '-') + ' · 가장 큰 영향 요소: ' + DC.esc(a.factor === '기타' && a.factorEtc ? '기타(' + a.factorEtc + ')' : (a.factor || '-')) + '</div>';
+    },
+    extraTop: list =>
+      DC.barsHtml(DC.tally(list, 'best', BEST), { title: '📊 가장 잘 만들어낸 프롬프트는? (우리 반 투표)', showTotal: true }) +
+      DC.barsHtml(DC.tally(list, 'factor', FACT), { title: '📊 결과에 가장 큰 영향을 준 요소는?', showTotal: true }),
+  });
+});
+</script>
+</body>
+</html>

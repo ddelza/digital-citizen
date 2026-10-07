@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1차시 ① 상황 이해하기 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.comic { display: flex; flex-direction: column; gap: 8px; }
+.bubble { background: var(--bg); border-radius: 12px; padding: 10px 12px; font-size: 0.86rem; line-height: 1.55; }
+.bubble.sys { background: #fff1f0; color: #c0392b; font-weight: 600; }
+.progress { height: 10px; border-radius: 6px; background: #eee; overflow: hidden; margin-top: 6px; }
+.progress div { width: 8%; height: 100%; background: var(--danger); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="concept">
+    <h3>📱 생활 속 문제 발견 (p.28)</h3>
+    <div class="comic">
+      <div class="bubble">📂 학습 정리 자료(<b>800MB</b>)를 반 친구들에게 블루투스로 보내려고 한다.</div>
+      <div class="bubble sys">🔵 첫 번째 친구 전송 완료… 전송 속도: 매우 느림
+        <div class="progress"><div></div></div><span class="dc-muted">8%</span></div>
+      <div class="bubble">⏰ 곧 수업이 시작되는데… <b>여러 명에게 빠르게 보내는 방법은 없을까?</b></div>
+    </div>
+    <p style="margin:10px 0 0">사진 보내기, 자료 전달, 함께 파일 편집은 이제 일상이에요. 하지만 같은 파일이라도 상황에 따라 <b>더 적합한 방법</b>이 따로 있어요.</p>
+  </div>
+
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+const FIELDS = [
+  { id: 'why', type: 'textarea', short: '블루투스를 고른 이유', label: '1. 학습 정리 자료를 블루투스로 보내려고 한 이유는 무엇일까?' },
+  { id: 'better', type: 'textarea', short: '더 나은 방법', label: '2. 여러 명에게 대용량 자료를 보낼 때, 더 나은 방법은 무엇일까?', hint: '그 방법이 왜 더 나은지 까닭도 함께 적어 보세요.' },
+];
+DC.start({ title: '1차시 ① 상황 이해하기', subtitle: '디지털 도구, 어떻게 사용해야 할까?' }).then(() => {
+  DC.form({ mount: '#form', key: 's1/situation', title: '✏️ 내 생각 적기', fields: FIELDS, required: ['why', 'better'] });
+  DC.board({ mount: '#board', key: 's1/situation', title: '👀 우리 반 친구들의 생각', hint: '공감 가는 생각에 ❤️, 궁금한 점은 댓글로 물어보세요.', fields: FIELDS, sort: 'likes' });
+});
+</script>
+</body>
+</html>

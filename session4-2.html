@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4차시 ② 성찰하고 정리하기 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 8px; }
+.chip { border: 1.5px solid #b197fc; background: #f3f0ff; color: #5f3dc4; border-radius: 999px; padding: 5px 12px; font-size: 0.84rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+.chip:active { background: #e5dbff; }
+.fb { font-size: 0.82rem; line-height: 1.6; }
+.fb .it { margin: 6px 0; padding: 8px 10px; border-radius: 8px; background: #fff; }
+.fb .it.ok { border-left: 4px solid #2f9e44; } .fb .it.no { border-left: 4px solid #e03131; }
+.fb .score { font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; }
+.read h4 { margin: 10px 0 4px; font-size: 0.9rem; color: var(--accent); }
+.read p { margin: 4px 0; font-size: 0.86rem; line-height: 1.7; }
+.pledge { font-size: 0.92rem; line-height: 1.6; background: #f3f0ff; border-radius: 12px; padding: 10px 12px; }
+.stack { display: flex; height: 14px; border-radius: 6px; overflow: hidden; background: #eef1f7; margin: 3px 0 2px; }
+.stack i { display: block; height: 100%; }
+.stack .s0 { background: #2f9e44; } .stack .s1 { background: #f0b429; } .stack .s2 { background: #e8590c; }
+.dist { background: var(--surface); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; font-size: 0.8rem; }
+.dist .t { font-weight: 700; font-size: 0.86rem; margin-bottom: 6px; }
+.dist .lab { margin-top: 6px; }
+.dist .nums { color: var(--text-muted); font-size: 0.74rem; }
+.dc-info:has(.fb), .dc-info:has(.read) { background: #f8f9fa; border-left-color: #7950f2; }
+.tabs { margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-t="0">① 성찰하기</button>
+    <button class="tab-btn" data-t="1">② 정리 퀴즈</button>
+    <button class="tab-btn" data-t="2">③ 확산 후 기록</button>
+    <button class="tab-btn" data-t="3">④ 읽기자료</button>
+  </div>
+
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+const RATES = [
+  '하드웨어, 소프트웨어, 인공지능의 개념을 이해하고 무엇이 다른지 설명할 수 있는가?',
+  '같은 목적이라도 상황에 따라 알맞은 도구가 달라질 수 있음을 설명할 수 있는가?',
+  '맥락, 목적, 조건을 담아 구체적인 프롬프트를 작성할 수 있는가?',
+  '인공지능의 환각 현상과 한계를 설명할 수 있는가?',
+  '나의 상황에 맞는 도구를 고르고, 그 까닭을 설명할 수 있는가?',
+];
+const OX = [
+  { q: '스마트폰이나 노트북처럼 눈에 보이고 손으로 만질 수 있는 물리적 장치를 소프트웨어라고 한다.', a: 'X', short: '소프트웨어=물리적 장치?', e: '눈에 보이고 만질 수 있는 물리적 장치는 \'하드웨어\'예요. 소프트웨어는 하드웨어에서 실행되는 프로그램이에요.' },
+  { q: '800MB처럼 큰 파일을 여러 명에게 전달할 때는, 블루투스로 직접 보내는 것보다 클라우드에 올려 링크를 공유하는 것이 더 빠르고 안정적이다.', a: 'O', short: '큰 파일은 클라우드 공유', e: '블루투스는 가까운 기기 사이 소용량 전송에 적합해요. 대용량을 여러 명에게 보낼 때는 클라우드 링크 공유가 낫습니다.' },
+  { q: '실시간 날씨를 확인할 때는 날씨 앱이, 길을 찾아갈 때는 지도 앱이 더 적합하다. 이처럼 하려는 일에 따라 알맞은 디지털 도구는 달라진다.', a: 'O', short: '일에 따라 알맞은 도구', e: '목적과 상황에 따라 더 알맞은 도구가 달라져요.' },
+  { q: '인공지능에 질문할 때 \'어떤 상황인지\' 맥락 정보를 더하면 더 적합한 결과를 얻을 가능성이 높아진다.', a: 'O', short: '맥락을 더하면 결과가 좋아짐', e: '맥락을 알려 줄수록 AI가 의도에 맞는 결과를 만들 가능성이 높아져요.' },
+  { q: '인공지능이 생성한 결과물은 항상 정확한 사실에 근거하므로, 따로 확인하거나 검증할 필요가 없다.', a: 'X', short: 'AI 결과는 검증 불필요?', e: '환각 현상처럼 AI는 사실이 아닌 내용을 사실처럼 말할 수 있어요. 중요한 정보는 반드시 확인해야 해요.' },
+];
+const STARS = [
+  '디지털 기술의 구성 요소와 도구별 차이를 설명할 수 있는가?',
+  '인공지능의 결과를 그대로 수용하지 않고 내가 직접 판단하고 검토할 수 있는가?',
+  '나의 상황에서 적합한 도구를 선택하는 기준을 말할 수 있는가?',
+];
+const WORDS = ['목적', '맥락', '판단', '협력', '주체성', '이해'];
+
+const GROUPS = [
+  { title: '① 성찰하기 (pp.40-41)', fields: [].concat(
+    RATES.map((q, i) => ({ id: 'rate' + (i + 1), type: 'rate3', short: '성찰 ' + (i + 1), label: (i + 1) + '. ' + q })),
+    [
+      { type: 'info', html: '<b>실천 다짐 쓰기</b> — 배운 내용을 떠올리며 핵심 단어를 눌러 보세요. 글 끝에 단어가 들어가요.<div class="chips" style="margin-top:6px">' +
+        WORDS.map(w => '<button type="button" class="chip" data-word="' + w + '">' + w + '</button>').join('') + '</div>' +
+        '<div class="dc-muted">예) 나는 디지털 도구를 사용할 때 목적과 맥락을 먼저 생각하고, 인공지능의 결과를 스스로 판단하며 주체성을 갖겠습니다. 인공지능을 이해하고 잘 협력하는 사람이 되겠습니다.</div>' },
+      { id: 'pledge', type: 'textarea', rows: 4, short: '실천 다짐', label: '나는 앞으로 ______ 되겠습니다.', placeholder: '나는 앞으로 …(3~4줄) 되겠습니다.' },
+    ]) },
+  { title: '② 정리하기 · 스스로 점검하기 (p.42)', fields: [].concat(
+    OX.map((o, i) => ({ id: 'ox' + (i + 1), type: 'ox', short: 'O/X ' + (i + 1), label: (i + 1) + '. ' + o.q, hint: i === 0 ? '맞으면 O, 틀리면 X를 골라요.' : '' })),
+    [{ type: 'info', html: '<div class="fb" id="oxfb">저장하면 정답과 설명이 여기에 나타나요.</div>' }],
+    STARS.map((q, i) => ({ id: 'star' + (i + 1), type: 'stars', short: '스스로 점검 ' + (i + 1), label: '스스로 점검 ' + (i + 1) + '. ' + q }))) },
+  { title: '③ 확산 후 반응 기록 (p.41)', fields: [
+    { id: 'share1', type: 'textarea', rows: 3, short: '후배·친구들의 반응', label: '후배·친구들의 반응' },
+    { id: 'share2', type: 'textarea', rows: 3, short: '느낀 점', label: '느낀 점' },
+    { id: 'share3', type: 'textarea', rows: 3, short: '다음에 보완하고 싶은 점', label: '다음에 보완하고 싶은 점' },
+  ] },
+  { title: '④ 읽기 자료 (p.43) — 인공지능의 답, 그대로 써도 될까?', fields: [
+    { type: 'info', html: '<div class="read"><h4>⚖️ 존재하지 않는 판례</h4><p>미국의 한 변호사가 재판 서류에 쓸 판례(비슷한 사건에서 법원이 내린 판단 기록)를 생성형 AI 챗봇에게 물었어요. 챗봇은 사건 이름과 판결 내용이 있는 자료를 여러 건 내놓았고 진짜처럼 보여 그대로 법원에 제출했지요. 하지만 상대편 변호사도 판사도 그 판례를 찾을 수 없었어요. 실제로 존재하지 않는, AI가 그럴듯하게 지어낸 답변이었답니다.</p>' +
+      '<h4>💡 우리가 얻을 교훈</h4><p>문제는 AI를 사용했다는 사실 자체가 아니라, 정확해야 하는 상황에서 AI의 답변만 믿고 공식 자료로 다시 확인하지 않은 것이에요. 판례처럼 정확해야 하는 정보는 법원 기록이나 믿을 만한 검색 시스템에서 실제로 존재하는지 확인해야 해요.</p>' +
+      '<p>생성형 AI는 글을 자연스럽게 만들고 아이디어를 정리하는 데 도움이 되지만 항상 사실만 말하지는 않아요. 사용하기 전, 마지막 확인은 직접 해야 합니다.</p></div>' },
+  ] },
+];
+
+function showTab(i) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', +b.dataset.t === i));
+  document.querySelectorAll('#form .dc-group').forEach((g, k) => { g.style.display = k === i ? '' : 'none'; });
+}
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('.tab-btn'); if (b) { showTab(+b.dataset.t); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+});
+document.addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const ta = document.querySelector('[data-fid="pledge"]'); if (!ta) return;
+  const s = ta.selectionStart, en = ta.selectionEnd;
+  const hasSel = document.activeElement === ta;
+  const w = (hasSel && s > 0 && !/\s/.test(ta.value[s - 1]) ? ' ' : '') + c.dataset.word;
+  if (hasSel) { ta.value = ta.value.slice(0, s) + w + ta.value.slice(en); ta.selectionStart = ta.selectionEnd = s + w.length; }
+  else ta.value += (ta.value && !/\s$/.test(ta.value) ? ' ' : '') + w;
+  ta.focus();
+});
+
+function renderFb(rec) {
+  const a = rec && rec.answers, box = document.getElementById('oxfb');
+  if (!box || !a || !OX.some((o, i) => a['ox' + (i + 1)])) return;
+  let ok = 0;
+  const items = OX.map((o, i) => {
+    const m = a['ox' + (i + 1)], right = m === o.a; if (right) ok++;
+    return '<div class="it ' + (right ? 'ok' : 'no') + '"><b>' + (right ? '⭕ 정답' : '❌ 오답') + '</b> (' + (i + 1) + '번 · 내 답 ' + (m || '미응답') + ' / 정답 ' + o.a + ')<br>' + DC.esc(o.e) + '</div>';
+  }).join('');
+  box.innerHTML = '<div class="score">🎯 ' + OX.length + '문제 중 ' + ok + '문제 정답</div>' + items;
+}
+
+function stats(list) {
+  if (!list.some(r => r.id === DC.student.id) && !DC.student.isTeacher) return '';
+  const ox = OX.map((o, i) => {
+    const ans = list.map(r => r.answers['ox' + (i + 1)]).filter(Boolean);
+    const pct = ans.length ? Math.round(ans.filter(x => x === o.a).length / ans.length * 100) : 0;
+    return { label: (i + 1) + '. ' + o.short, value: pct };
+  });
+  const rate = RATES.map((q, i) => {
+    const c = DC.RATE3.map(r => list.filter(x => x.answers['rate' + (i + 1)] === r).length);
+    const tot = c[0] + c[1] + c[2] || 1;
+    return '<div class="lab">' + (i + 1) + '. ' + DC.esc(q.slice(0, 22)) + '…<div class="stack">' + c.map((n, k) => '<i class="s' + k + '" style="width:' + n / tot * 100 + '%"></i>').join('') + '</div>' +
+      '<div class="nums">잘함 ' + c[0] + ' · 보통 ' + c[1] + ' · 노력 ' + c[2] + '</div></div>';
+  }).join('');
+  return DC.barsHtml(ox, { title: '📊 우리 반 O/X 정답률', unit: '%' }) +
+    '<div class="dist"><div class="t">🙋 우리 반 자기평가 분포 (초록=잘함, 노랑=보통, 주황=노력)</div>' + rate + '</div>';
+}
+
+DC.start({ title: '4차시 ② 성찰하고 정리하기', subtitle: '우리의 배움을 어떻게 되돌아보고 실천할 수 있을까?' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's4/reflect', title: '📝 단원 마무리', groups: GROUPS, required: ['pledge'],
+    onLoad: rec => { showTab(0); renderFb(rec); },
+    onSaved: rec => renderFb(rec),
+  });
+  DC.board({
+    mount: '#board', key: 's4/reflect', title: '🌱 우리 반 실천 다짐 벽', sort: 'likes',
+    hint: '친구의 다짐에 ❤️와 응원 댓글을 남겨 주세요. 다짐은 저장하면 열려요.',
+    cardHtml: r => '<div class="pledge">' + DC.nl2br(r.answers.pledge || '') + '</div>',
+    extraTop: stats,
+  });
+});
+</script>
+</body>
+</html>

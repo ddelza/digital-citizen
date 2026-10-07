@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1차시 ③ 같은 미션, 다른 선택! — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.cmp { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin: 6px 0 10px; table-layout: fixed; }
+.cmp th, .cmp td { border: 1px solid #e1e6f2; padding: 5px 6px; vertical-align: top; word-break: break-word; }
+.cmp th { background: #f2f4fa; }
+.cmp td:first-child { width: 22%; background: #fafbfe; font-weight: 700; color: var(--accent); }
+.mt { font-weight: 800; font-size: 0.82rem; margin-top: 8px; }
+.pair { background: #fff8e6; border-radius: 8px; padding: 8px 10px; font-size: 0.82rem; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="concept">
+    <h3>🧪 활동 1 · 같은 미션, 다른 선택! (p.31)</h3>
+    <p style="margin:0 0 6px">아래 두 미션을 <b>서로 다른 두 가지 도구</b>로 직접 해 보고, 결과를 표처럼 정리해 봐요. 같은 일도 도구에 따라 과정과 결과가 달라져요.</p>
+    <table>
+      <tr><th>미션 1</th><td>오늘 저녁 우리 동네 날씨 알아보기<br><span class="dc-muted">두 방법 모두 예보 내용, 정보의 출처, 업데이트 시각을 확인해 적어요.</span></td></tr>
+      <tr><th>미션 2</th><td>선생님이 주신 50MB 연습용 사진 파일을 같은 교실 친구 4명에게 전달하기<br><span class="dc-muted">두 방법 모두 걸린 시간, 받는 사람의 확인 여부, 실패했다면 그 까닭을 적어요.</span></td></tr>
+    </table>
+    <p class="dc-muted" style="margin:0">⚠️ 인공지능에 이름·친구 사진·계정 정보는 넣지 마세요.</p>
+  </div>
+
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+const TOOLS = ['생성형 인공지능', '포털 검색', '지도 앱', '날씨 앱', '캘린더 앱', '기기 간 직접 전송(블루투스·에어드롭 등)', '클라우드 공유(링크)', '메신저 단체방', '기타'];
+const M = [
+  { n: 1, title: '미션 1 · 우리 동네 날씨 알아보기', res: '예보 내용, 정보의 출처, 업데이트 시각을 적어 보세요.', ex: ['포털 검색', '생성형 인공지능'] },
+  { n: 2, title: '미션 2 · 50MB 사진을 친구 4명에게', res: '전달 결과, 받는 사람의 확인 여부, 실패했다면 그 까닭을 적어 보세요.', ex: ['기기 간 직접 전송(블루투스·에어드롭 등)', '클라우드 공유(링크)'] },
+];
+const groups = [], ALL = [];
+M.forEach(m => [1, 2].forEach(k => {
+  const p = 'm' + m.n + '_' + k + '_';
+  const fs = [
+    { id: p + 'tool', type: 'radio', label: '사용한 도구', options: TOOLS, short: '도구', hint: '예) ' + m.ex[k - 1] },
+    { id: p + 'etc', type: 'text', label: '기타를 골랐다면 어떤 도구인가요?', short: '기타 도구', placeholder: '예) 학급 밴드' },
+    { id: p + 'result', type: 'textarea', label: '결과와 확인한 내용', short: '결과·확인', hint: m.res },
+    { id: p + 'time', type: 'number', label: '걸린 시간', short: '걸린 시간', prefix: '약', suffix: '분' },
+    { id: p + 'pain', type: 'text', label: '불편했던 점', short: '불편한 점' },
+  ];
+  groups.push({ title: m.title.split(' · ')[0] + ' — 방법 ' + k, fields: fs });
+  ALL.push.apply(ALL, fs);
+}));
+groups.push({ title: '짝과 비교하기', fields: [
+  { id: 'pair', type: 'textarea', label: '2. 짝과 표를 비교해 보고, 서로 다른 도구를 선택한 까닭과 결과에서 가장 크게 달라진 점을 적어 보자.', short: '짝 비교', rows: 4 },
+] });
+const FIELDS = ALL.concat(groups[groups.length - 1].fields);
+
+const toolOf = (a, p) => a[p + 'tool'] === '기타' ? '기타' + (a[p + 'etc'] ? ': ' + a[p + 'etc'] : '') : (a[p + 'tool'] || '');
+const shortTool = t => t.replace(/\(.*\)/, '');
+
+DC.start({ title: '1차시 ③ 같은 미션, 다른 선택!', subtitle: '알맞은 방법 찾기 · 도구를 바꾸면 결과도 달라져요' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's1/mission', title: '✏️ 미션 결과 표 정리', groups, fields: undefined,
+    hint: '도구는 방법 1, 방법 2에서 서로 다르게 골라 보세요. 직접 해 본 시간을 적어요.',
+    required: ['m1_1_tool', 'm1_1_result', 'm1_1_time', 'm1_2_tool', 'm1_2_result', 'm1_2_time', 'm2_1_tool', 'm2_1_result', 'm2_1_time', 'm2_2_tool', 'm2_2_result', 'm2_2_time', 'pair'],
+    validate: (a) => {
+      for (const m of [1, 2]) for (const k of [1, 2]) {
+        const p = 'm' + m + '_' + k + '_';
+        if (a[p + 'tool'] === '기타' && !a[p + 'etc']) return '미션 ' + m + ' 방법 ' + k + '에서 기타 도구가 무엇인지 적어 주세요.';
+        if (!(Number(a[p + 'time']) >= 0)) return '걸린 시간은 0 이상의 숫자로 적어 주세요.';
+      }
+      return '';
+    },
+  });
+
+  const cardHtml = (r) => {
+    const a = r.answers;
+    return [1, 2].map(n => {
+      const c = k => { const p = 'm' + n + '_' + k + '_'; return [toolOf(a, p), a[p + 'result'], (a[p + 'time'] === '' || a[p + 'time'] === undefined ? '-' : a[p + 'time'] + '분'), a[p + 'pain'] || '-']; };
+      const x = c(1), y = c(2), rows = ['도구', '결과·확인', '걸린 시간', '불편한 점'];
+      return '<div class="mt">미션 ' + n + (n === 1 ? ' · 동네 날씨' : ' · 50MB 사진 전달') + '</div><table class="cmp"><tr><th></th><th>방법 1</th><th>방법 2</th></tr>' +
+        rows.map((t, i) => '<tr><td>' + t + '</td><td>' + DC.nl2br(x[i]) + '</td><td>' + DC.nl2br(y[i]) + '</td></tr>').join('') + '</table>';
+    }).join('') + (a.pair ? '<div class="pair"><b>🤝 짝 비교</b><br>' + DC.nl2br(a.pair) + '</div>' : '');
+  };
+
+  const extraTop = (list) => {
+    if (!DC.student.isTeacher && !list.some(r => r.id === DC.student.id)) return '';
+    if (!list.length) return '';
+    let h = '<div class="dc-board-title">📊 우리 반 도구 선택 집계</div>';
+    M.forEach(m => {
+      const cnt = {}, tm = {};
+      list.forEach(r => [1, 2].forEach(k => {
+        const p = 'm' + m.n + '_' + k + '_', t = r.answers[p + 'tool'];
+        if (!t) return;
+        const key = shortTool(t);
+        cnt[key] = (cnt[key] || 0) + 1;
+        const v = parseFloat(r.answers[p + 'time']);
+        if (!isNaN(v)) (tm[key] = tm[key] || []).push(v);
+      }));
+      const items = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).map(k => ({ label: k, value: cnt[k] }));
+      const avgs = Object.keys(tm).map(k => ({ label: k + ' (' + tm[k].length + '건)', value: Math.round(tm[k].reduce((s, v) => s + v, 0) / tm[k].length * 10) / 10 })).sort((a, b) => a.value - b.value);
+      if (avgs.length) avgs[0].highlight = true;
+      h += DC.barsHtml(items, { title: m.title + ' — 선택한 도구(방법 1·2 합산)', unit: '건' }) +
+        DC.barsHtml(avgs, { title: m.title + ' — 도구별 평균 걸린 시간' + (m.n === 2 ? ' ⏱️ 비교해 보세요!' : ''), unit: '분' });
+    });
+    return h + '<p class="dc-muted" style="margin-bottom:12px">초록색 막대는 평균 시간이 가장 짧은 도구예요. 아래에서 친구들의 표도 살펴보세요.</p>';
+  };
+
+  DC.board({ mount: '#board', key: 's1/mission', title: '👀 우리 반 친구들의 미션 표', hint: '친구는 어떤 도구를 골랐을까요? 비교해 보고 ❤️와 댓글로 반응해 주세요.', fields: FIELDS, cardHtml, extraTop, sort: 'recent' });
+});
+</script>
+</body>
+</html>

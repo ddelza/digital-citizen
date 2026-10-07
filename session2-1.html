@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2차시 ① 인공지능의 한계와 인간의 역할 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.dc-group .concept { box-shadow: none; border: 1px solid #e1e6f2; padding: 12px 14px; margin: 10px 0; }
+.dc-group .dc-info:has(.concept), .dc-group .dc-info:has(#game) { background: none; border: none; padding: 0; margin: 0; }
+.case { background: #fff1f0; border-left: 4px solid var(--danger); border-radius: 8px; padding: 10px 12px; font-size: 0.84rem; line-height: 1.65; }
+.gstep { display: flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 10px; padding: 8px 10px; margin: 6px 0; flex-wrap: wrap; }
+.gstep .pos { background: var(--accent); color: #fff; border-radius: 50%; width: 22px; height: 22px; text-align: center; font-size: 0.75rem; line-height: 22px; font-weight: 700; flex: none; }
+.gstep .nm { flex: 1; min-width: 110px; font-size: 0.88rem; font-weight: 700; }
+.gstep button { border: 1.5px solid var(--border); background: var(--surface); border-radius: 8px; padding: 5px 9px; font-size: 0.8rem; cursor: pointer; font-family: inherit; }
+.gstep button.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.gstep button.ai.on { background: #e8590c; border-color: #e8590c; }
+.gfb { margin-top: 10px; font-size: 0.84rem; line-height: 1.7; background: #f6f8fc; border-radius: 10px; padding: 10px 12px; }
+.gfb .good { color: #2f9e44; font-weight: 700; } .gfb .bad { color: var(--danger); font-weight: 700; }
+.backrow { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.backrow button { border: 1.5px solid var(--border); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; cursor: pointer; font-family: inherit; }
+.backrow button.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+// ---------- 교과서 내용 (개념 카드 html) ----------
+const C_HALL = '<div class="concept"><h3>🌀 환각(Hallucination) 현상 (p.32)</h3>' +
+  '<p style="margin:0 0 6px">인공지능의 결과가 항상 정확한 것은 아니에요. <b>환각</b>이란 생성형 인공지능이 사실이 아니거나 근거가 불분명한 내용을 <b>사실처럼</b> 제시하는 현상이에요.</p>' +
+  '<ul style="margin:0 0 6px;padding-left:20px"><li>존재하지 않는 사실을 지어내거나 잘못된 출처·인용을 제시함</li><li>사실과 다른 정보나 오개념을 주장함</li><li>논리적 모순이나 비약이 포함됨</li></ul>' +
+  '<p style="margin:0">👉 중요한 정보는 반드시 <b>믿을 만한 다른 출처와 비교</b>해 확인해요.</p></div>';
+const C_LIMIT = '<div class="concept"><h3>⚠️ 인공지능의 한계와 원인</h3><table>' +
+  '<tr><th>한계</th><th>원인</th></tr>' +
+  '<tr><td><b>맥락 이해의 한계</b></td><td>질문이나 지시가 모호하면 의도와 다른 답변을 만들 수 있다.</td></tr>' +
+  '<tr><td><b>편향된 결과</b></td><td>학습 데이터에 특정 집단이나 관점이 치우쳐 있으면 결과에도 편향이 나타날 수 있다.</td></tr>' +
+  '<tr><td><b>최신 정보 부재</b></td><td>학습 이후의 정보나 실시간 정보를 반영하지 못할 수 있다. 다만 웹 검색 기능을 사용하면 일부 보완할 수 있다.</td></tr></table></div>';
+const C_CASE = '<div class="concept"><h3>📖 환각 사례 — 인공지능의 답, 그대로 써도 될까? (p.43)</h3>' +
+  '<div class="case">미국의 한 변호사가 재판 서류에 쓸 <b>판례</b>(비슷한 사건에서 법원이 내린 판단 기록)를 생성형 인공지능 챗봇에게 물었다. 챗봇은 사건 이름과 판결 내용이 있는 자료를 여러 건 제시했고, 진짜처럼 보여 그대로 법원에 제출했다. 하지만 상대편 변호사도 판사도 그 판례를 찾을 수 없었다. 실제로 존재하지 않는, 인공지능이 그럴듯하게 <b>지어낸 답변</b>이었다.</div>' +
+  '<p style="margin:8px 0 0">문제는 인공지능을 사용했다는 사실 자체가 아니라, 정확해야 하는 상황에서 <b>답변만 믿고 공식 자료로 다시 확인하지 않은 것</b>이에요. 판례처럼 정확해야 하는 정보는 법원 기록이나 믿을 만한 검색 시스템에서 실제로 존재하는지 확인해야 해요.</p></div>';
+const C_ROLE = '<div class="concept"><h3>🤝 인공지능과 협력할 때 인간의 역할</h3>' +
+  '<p style="margin:0">인공지능은 사람이 정한 목적과 지시에 따라 결과를 만들지만, <b>결과에 책임지는 주체는 아니에요.</b> 그래서 사람은</p>' +
+  '<ul style="margin:6px 0 0;padding-left:20px"><li>목적과 방향을 정하고,</li><li>결과가 알맞고 정확한지 점검하고,</li><li>필요하면 지시를 고쳐 다시 요청하고,</li><li>최종 결과는 스스로 판단해 사용해야 해요.</li></ul></div>';
+const C_GAME = '<div class="concept"><h3>🎮 누가 할까? 사람 vs 인공지능</h3>' +
+  '<p style="margin:0 0 4px">인공지능과 협력하는 5단계가 <b>뒤섞여</b> 있어요. ▲▼로 올바른 순서로 맞추고, 각 단계를 맡는 쪽(사람/AI)을 골라요.</p>' +
+  '<div id="game"></div></div>';
+
+const OPT = ['출처', '최신성', '사실 여부'];
+const GROUPS = [
+  { title: '① 도입 (p.31)', fields: [
+    { id: 'mission', type: 'textarea', short: '서로 다른 결과가 나온 미션', label: '1차시 도구 비교표에서 서로 다른 결과가 나온 미션 한 가지를 짚어 보세요.', hint: '어떤 미션에서 어떤 결과가 서로 달랐나요?' },
+    { id: 'firstCheck', type: 'radio', short: '먼저 확인할 것', label: '인공지능 답변에서 사람이 먼저 확인해야 할 것은?', options: OPT },
+    { id: 'firstWhy', type: 'textarea', short: '그렇게 고른 이유', label: '그것을 먼저 확인해야 하는 이유는?', rows: 2 },
+  ] },
+  { title: '② 인공지능의 한계와 인간의 역할 이해하기 (p.32)', fields: [
+    { type: 'info', html: C_HALL }, { type: 'info', html: C_LIMIT }, { type: 'info', html: C_CASE }, { type: 'info', html: C_ROLE },
+    { type: 'info', html: C_GAME },
+  ] },
+  { title: '③ 생각 더하기 (p.33)', fields: [
+    { id: 'think1', type: 'textarea', short: '매번 다른 답이 나오는 까닭', label: '1. 같은 프롬프트를 넣어도 인공지능은 매번 조금씩 다른 답을 내놓는다. 왜 그럴까? 친구와 결과를 비교해 보고, 다르다면 그 까닭을 이야기해 보자.' },
+    { id: 'think2', type: 'textarea', short: '이름·사진을 넣어도 될까', label: '2. 프롬프트에 내 이름이나 친구의 사진을 넣어도 괜찮을까? 입력한 내용이 어디에 저장될지 생각해 보자.' },
+    { type: 'info', html: '🔒 인공지능에게 <b>이름·친구 사진·계정 정보</b> 같은 개인정보는 입력하지 않아요.' },
+  ] },
+];
+const FIELDS = DC.allFields({ groups: GROUPS });
+const BOARD_FIELDS = FIELDS.filter(f => f.type !== 'info');
+
+// ---------- 게임: 누가 할까? ----------
+const STEPS = { 1: ['목적 설정', '사람'], 2: ['프롬프트 작성', '사람'], 3: ['인공지능의 결과 생성', 'AI'], 4: ['결과 점검', '사람'], 5: ['활용 여부 결정', '사람'] };
+const NUM = ['', '①', '②', '③', '④', '⑤'];
+const G = { order: [4, 1, 5, 3, 2], roles: {}, back: null, result: '', fb: '' };
+
+function renderGame() {
+  const el = document.getElementById('game');
+  if (!el) return;
+  let h = G.order.map((id, i) =>
+    '<div class="gstep"><span class="pos">' + (i + 1) + '</span><span class="nm">' + STEPS[id][0] + '</span>' +
+    '<button data-up="' + i + '"' + (i === 0 ? ' disabled' : '') + '>▲</button><button data-down="' + i + '"' + (i === 4 ? ' disabled' : '') + '>▼</button>' +
+    '<button data-role="' + id + ':사람" class="' + (G.roles[id] === '사람' ? 'on' : '') + '">🧑 사람</button>' +
+    '<button data-role="' + id + ':AI" class="ai ' + (G.roles[id] === 'AI' ? 'on' : '') + '">🤖 AI</button></div>').join('');
+  h += '<div style="font-size:0.84rem;font-weight:700;margin-top:10px">결과가 마음에 들지 않을 때, 사람은 어느 단계로 되돌아가 다시 요청할까?</div><div class="backrow">' +
+    [1, 2, 3, 5].map(n => '<button data-back="' + n + '" class="' + (G.back === n ? 'on' : '') + '">' + NUM[n] + ' ' + STEPS[n][0] + '</button>').join('') + '</div>';
+  h += '<button class="btn small" data-check="1" style="margin-top:8px">✔ 확인하기</button>';
+  if (G.fb) h += '<div class="gfb">' + G.fb + '</div>';
+  else if (G.result) h += '<div class="gfb dc-muted">이전에 저장한 결과: <b>' + G.result + '</b> (다시 풀어서 확인해도 돼요)</div>';
+  el.innerHTML = h;
+}
+function checkGame() {
+  const orderOk = G.order.join(',') === '1,2,3,4,5';
+  const wrongRole = G.order.filter(id => G.roles[id] !== STEPS[id][1]).map(id => STEPS[id][0]);
+  const backOk = G.back === 2;
+  const li = [];
+  li.push(orderOk ? '<span class="good">✅ 순서 정답!</span> ① 목적 설정 → ② 프롬프트 작성 → ③ 인공지능의 결과 생성 → ④ 결과 점검 → ⑤ 활용 여부 결정'
+    : '<span class="bad">❌ 순서를 다시 생각해 봐요.</span> 먼저 목적을 정하고, 프롬프트를 쓰고, 그다음에 인공지능이 결과를 만들어요.');
+  li.push(!wrongRole.length ? '<span class="good">✅ 담당 정답!</span> <b>③ 결과 생성만 인공지능</b>이 하고, 나머지는 모두 사람이 해요. 최종 책임은 사람에게 있어요.'
+    : '<span class="bad">❌ 담당을 다시 확인해요:</span> ' + wrongRole.join(', ') + ' (※ 선택하지 않은 단계 포함)');
+  li.push(backOk ? '<span class="good">✅ 되돌아가기 정답!</span> ④ 점검에서 고칠 점이 보이면 <b>② 프롬프트를 고쳐 다시 요청</b>해요.'
+    : '<span class="bad">❌ 되돌아갈 곳을 다시 생각해 봐요.</span> 결과를 바꾸려면 AI에게 주는 지시, 즉 프롬프트를 고쳐야 해요.');
+  G.result = orderOk && !wrongRole.length && backOk ? '정답' : '오답';
+  G.fb = li.join('<br>') + (G.result === '정답' ? '<br>🎉 모두 맞혔어요!' : '');
+  renderGame();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#game button'); if (!b) return;
+  const d = b.dataset;
+  if (d.up !== undefined) { const i = +d.up; [G.order[i - 1], G.order[i]] = [G.order[i], G.order[i - 1]]; }
+  else if (d.down !== undefined) { const i = +d.down; [G.order[i + 1], G.order[i]] = [G.order[i], G.order[i + 1]]; }
+  else if (d.role) { const p = d.role.split(':'); G.roles[p[0]] = p[1]; }
+  else if (d.back) G.back = +d.back;
+  else if (d.check) return checkGame();
+  G.fb = ''; renderGame();
+});
+
+DC.start({ title: '2차시 ① 인공지능의 한계와 인간의 역할', subtitle: '인공지능과 잘 협력하려면 어떻게 해야 할까?' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's2/limits', title: '✏️ 내 생각 적기', groups: GROUPS,
+    required: ['mission', 'firstCheck', 'firstWhy', 'think1', 'think2'],
+    validate: ans => {
+      if (!G.result) return '게임에서 "확인하기"를 눌러 결과를 확인한 뒤 저장해 주세요.';
+      ans.flowCorrect = G.result; // 게임 결과도 함께 저장
+      return '';
+    },
+    onLoad: rec => { G.result = (rec && rec.answers && rec.answers.flowCorrect) || ''; renderGame(); },
+  });
+  DC.board({
+    mount: '#board', key: 's2/limits', title: '👀 우리 반 친구들의 생각', sort: 'likes',
+    hint: '공감 가는 생각에 ❤️, 궁금한 점은 댓글로 물어보세요.', fields: BOARD_FIELDS,
+    extraTop: list => DC.barsHtml(DC.tally(list, 'firstCheck', OPT), { title: '📊 우리 반이 AI 답변에서 먼저 확인하려는 것', showTotal: true }),
+  });
+});
+</script>
+</body>
+</html>

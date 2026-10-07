@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3차시 ② 디지털 도구 활용 가이드 만들기 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.ig { border-radius: 16px; padding: 14px; background: linear-gradient(160deg, #e7f5ff, #f3f0ff); border: 2px solid #b197fc; }
+.ig h4 { margin: 0 0 10px; text-align: center; font-size: 0.95rem; color: #5f3dc4; }
+.ig-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ig-tool { background: #fff; border-radius: 12px; padding: 10px; font-size: 0.8rem; line-height: 1.55; }
+.ig-tool .nm { font-weight: 800; font-size: 0.9rem; text-align: center; padding: 4px; border-radius: 8px; margin-bottom: 6px; color: #fff; background: #7950f2; }
+.ig-tool.t2 .nm { background: #1c7ed6; }
+.ig-tool .yes { color: #2b8a3e; } .ig-tool .no { color: #c92a2a; }
+.ig-tool .yes b, .ig-tool .no b { display: block; font-size: 0.72rem; }
+.ig-tool ul { margin: 2px 0 6px; padding-left: 16px; }
+.ig-sum { margin-top: 10px; background: #fff3bf; border-radius: 10px; padding: 8px 10px; font-size: 0.82rem; font-weight: 700; text-align: center; line-height: 1.5; }
+.gp { border: 2px dashed #b197fc; border-radius: 14px; padding: 12px; background: #fff; font-size: 0.82rem; line-height: 1.55; }
+.gp .gp-ttl { font-weight: 800; color: #5f3dc4; margin-bottom: 6px; }
+.gp .gp-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.gp .gp-t { background: #f8f9fa; border-radius: 10px; padding: 8px; }
+.gp .gp-t b.nm { display: block; color: #fff; background: #7950f2; border-radius: 6px; text-align: center; padding: 2px; margin-bottom: 4px; }
+.gp .gp-t.t2 b.nm { background: #1c7ed6; }
+.gp .gp-tip { margin-top: 6px; font-weight: 700; color: #e67700; }
+.gp .empty { color: var(--text-muted); font-weight: 400; }
+.prompt-box { white-space: pre-wrap; background: #1f2430; color: #e9ecef; border-radius: 10px; padding: 12px; font-size: 0.82rem; line-height: 1.65; margin: 6px 0 8px; }
+.prompt-box .blank { color: #ffd43b; }
+.mini-card { background: #f8f9fa; border-radius: 10px; padding: 8px 10px; margin: 6px 0; font-size: 0.82rem; line-height: 1.55; }
+.mini-card b.nm { color: #5f3dc4; }
+.dc-info:has(.ig), .dc-info:has(.gp) { background: none; border: 0; padding: 0; margin: 8px 0; }
+.dc-info:has(.prompt-box), .dc-info:has(.pbtns) { background: #f8f9fa; border-left-color: #7950f2; }
+.pbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="concept">
+    <h3>🎨 디지털 도구 활용 가이드 (pp.37-39)</h3>
+    <p style="margin:0 0 8px">31쪽에서 비교한 도구의 특징과 나의 원칙을 바탕으로, 후배나 친구에게 도움이 되는 <b>도구 선택 가이드(인포그래픽)</b>를 기획하고 만들어 보세요. 아래는 교과서의 인포그래픽 예시예요.</p>
+    <div class="ig">
+      <h4>상황에 맞는 도구 고르기 <span class="dc-muted">(후배들을 위한 꿀팁)</span></h4>
+      <div class="ig-tools">
+        <div class="ig-tool"><div class="nm">🤖 생성형 인공지능</div>
+          <div class="yes"><b>✅ 사용할 때</b><ul><li>새로운 아이디어가 필요할 때</li><li>글을 다듬거나 영어 표현을 물어볼 때</li></ul></div>
+          <div class="no"><b>⛔ 사용하지 말아야 할 때</b><ul><li>정확한 사실·출처를 확인해야 할 때</li><li>중요한 과제를 직접 작성해야 할 때</li></ul></div></div>
+        <div class="ig-tool t2"><div class="nm">🔎 포털 검색</div>
+          <div class="yes"><b>✅ 사용할 때</b><ul><li>신뢰할 수 있는 최신 정보를 찾을 때</li><li>뉴스·공지·지도·일정을 확인할 때</li></ul></div>
+          <div class="no"><b>⛔ 사용하지 말아야 할 때</b><ul><li>창의적인 아이디어가 필요할 때</li><li>고민 상담이나 긴 문장 작성이 필요할 때</li></ul></div></div>
+      </div>
+      <div class="ig-sum">창의적인 아이디어는 생성형 인공지능에게, 정확한 정보 확인은 포털 검색에게 물어보세요!</div>
+    </div>
+  </div>
+
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+function toolFields(n, ex) {
+  const p = 't' + n + '_', L = n + '번 도구 ';
+  return [
+    { id: p + 'name', type: 'text', short: L + '이름', label: '도구 이름', placeholder: ex ? '예) ' + ex[0] : '' },
+    { id: p + 'func', type: 'text', short: L + '대표 기능', label: '대표 기능', placeholder: ex ? '예) ' + ex[1] : '' },
+    { id: p + 'use', type: 'text', short: L + '이럴 때 써요', label: '이럴 때 써요', placeholder: ex ? '예) ' + ex[2] : '' },
+    { id: p + 'avoid', type: 'textarea', rows: 2, short: L + '쓰지 말아요', label: '이럴 때는 쓰지 말아요' },
+    { id: p + 'tip', type: 'text', short: L + '한 줄 요령', label: '나만의 한 줄 요령' },
+  ];
+}
+const GROUPS = [
+  { title: '1단계 · 기획하기 (p.37)', fields: [
+    { id: 'tools', type: 'text', short: '소개할 도구', label: '소개할 도구 2가지', example: '생성형 인공지능, 포털 검색' },
+    { id: 'audience', type: 'text', short: '가이드를 볼 사람', label: '이 가이드를 볼 사람', example: '디지털 선택이 어려운 후배' },
+    { id: 'message', type: 'text', short: '핵심 메시지', label: '전하려는 핵심 메시지', example: '무조건 익숙한 것보다 상황에 맞는 도구를 골라 쓰자.' },
+  ] },
+  { title: '🔧 도구 카드 1', fields: toolFields(1, ['생성형 인공지능', '아이디어 제안, 글 다듬기', '새로운 아이디어가 필요할 때']) },
+  { title: '🔧 도구 카드 2', fields: toolFields(2, ['포털 검색', '실시간 정보 검색과 요약', '실시간 날씨나 최신 뉴스처럼 정확한 정보가 필요할 때']) },
+  { title: '👀 내 가이드 미리보기', fields: [{ type: 'info', html: '<div class="gp" id="gp"></div>' }] },
+  { title: '2단계 · 만들기 (p.38)', fields: [
+    { type: 'info', html: '그림·아이콘·표·화살표 등 시각 요소를 자유롭게 활용해 그리기 앱·문서 앱·발표 자료 앱으로 직접 만들거나, 생성형 인공지능의 도움을 받아 초안을 만들 수 있어요.<br><b>생성형 인공지능을 사용하지 않는다면 아래 프롬프트와 3번 활동은 건너뛰어도 돼요.</b>' },
+    { id: 'memo', type: 'textarea', rows: 4, short: '인포그래픽 구상', label: '1. 인포그래픽 형태를 구상하고 만들어 보자', hint: '어떤 모양(카드, 표, 비교 그림 등)으로 어떤 순서로 보여 줄지 메모해 보세요.' },
+    { type: 'info', html: '🔒 <b>개인정보 주의</b> — 인공지능에 내 이름·친구 사진·계정 정보는 넣지 마세요. 입력한 내용은 어디에 저장될지 알 수 없어요.' },
+    { id: 'p_role', type: 'text', short: '프롬프트 역할', label: '2. 프롬프트 · 역할', prefix: '너는', suffix: '야.', placeholder: '중학생을 위한 인포그래픽 디자이너' },
+    { id: 'p_context', type: 'textarea', rows: 4, short: '프롬프트 맥락', label: '맥락 — 아래는 내가 정리한 내용이야.', hint: '아래 버튼으로 위에서 쓴 도구 카드 내용을 자동으로 불러올 수 있어요.' },
+    { type: 'info', html: '<div class="pbtns"><button type="button" class="btn secondary small" id="btnFill">⬇️ 도구 카드 내용 불러오기</button></div>' },
+    { id: 'p_task', type: 'text', short: '프롬프트 임무', label: '임무', prefix: '위 내용을 바탕으로,', suffix: '을 한눈에 보여 주는 인포그래픽 이미지를 만들어 줘.', placeholder: '두 도구의 차이' },
+    { id: 'p_form', type: 'text', short: '프롬프트 제약(형태)', label: '제약 ①', suffix: '형태로, 한국어로,', placeholder: '카드' },
+    { id: 'p_extra', type: 'text', short: '프롬프트 제약(추가)', label: '제약 ②', suffix: '만들어 줘.', placeholder: '각 항목은 한 줄 이내로 써' },
+    { type: 'info', html: '<b>📝 완성된 프롬프트 미리보기</b><div class="prompt-box" id="pbox"></div><div class="pbtns"><button type="button" class="btn small" id="btnCopy">📋 복사</button></div>' },
+    { id: 'fix', type: 'text', short: '결과에서 고쳐야 할 부분', label: '3. 결과에서 고쳐야 할 부분', hint: '생성형 AI가 만든 이미지에는 잘못된 정보나 글자 오류가 있을 수 있어요. 반드시 확인하고 고치세요.' },
+    { id: 'fixPrompt', type: 'text', short: '프롬프트 수정·추가', label: '프롬프트에서 수정하거나 추가한 내용' },
+  ] },
+  { title: '🔗 결과물 링크', fields: [
+    { id: 'link', type: 'text', short: '결과물 링크', label: '완성한 가이드 공유 링크', placeholder: 'https://...', hint: 'Canva·구글 드라이브·패들렛 등의 공유 링크를 붙여 넣으세요. 친구들이 볼 수 있도록 "링크가 있는 모든 사용자 — 보기" 권한으로 설정해야 해요.' },
+  ] },
+];
+
+const $ = (id) => document.getElementById(id);
+const val = (fid) => { const e = document.querySelector('[data-fid="' + fid + '"]'); return e ? e.value.trim() : ''; };
+
+function updatePreview() {
+  const gp = $('gp'); if (!gp) return;
+  const tool = n => {
+    const nm = val('t' + n + '_name');
+    if (!nm && !val('t' + n + '_func') && !val('t' + n + '_use') && !val('t' + n + '_avoid')) return '<div class="gp-t t' + n + '"><span class="empty">도구 카드 ' + n + '을(를) 채우면 여기에 보여요.</span></div>';
+    return '<div class="gp-t t' + n + '"><b class="nm">' + DC.esc(nm || '(도구 이름)') + '</b>' +
+      (val('t' + n + '_func') ? '<div>⚙️ ' + DC.esc(val('t' + n + '_func')) + '</div>' : '') +
+      (val('t' + n + '_use') ? '<div>✅ ' + DC.esc(val('t' + n + '_use')) + '</div>' : '') +
+      (val('t' + n + '_avoid') ? '<div>⛔ ' + DC.nl2br(val('t' + n + '_avoid')) + '</div>' : '') +
+      (val('t' + n + '_tip') ? '<div class="gp-tip">💡 ' + DC.esc(val('t' + n + '_tip')) + '</div>' : '') + '</div>';
+  };
+  gp.innerHTML = '<div class="gp-ttl">' + DC.esc(val('message') || '핵심 메시지를 적어 보세요') + '</div>' +
+    '<div class="dc-muted" style="margin-bottom:6px">👥 ' + DC.esc(val('audience') || '가이드를 볼 사람') + '</div><div class="gp-tools">' + tool(1) + tool(2) + '</div>';
+  const b = (fid, ph) => { const v = val(fid); return v ? DC.esc(v) : '<span class="blank">' + ph + '</span>'; };
+  const ctx = val('p_context');
+  $('pbox').innerHTML = '너는 ' + b('p_role', '______') + '야.\n' +
+    (ctx ? DC.esc(ctx) : '<span class="blank">(아래는 내가 정리한 내용이야. 도구 카드 내용을 불러오거나 직접 적어요.)</span>') +
+    '\n위 내용을 바탕으로, ' + b('p_task', '______') + '을 한눈에 보여 주는 인포그래픽 이미지를 만들어 줘.\n' +
+    b('p_form', '______') + ' 형태로, 한국어로, ' + b('p_extra', '______') + ' 만들어 줘.';
+}
+function plainPrompt() { return $('pbox').textContent.replace(/\(아래는 내가 정리한 내용이야[^)]*\)/, '아래는 내가 정리한 내용이야.'); }
+function cardsText() {
+  let t = '';
+  if (val('audience')) t += '- 가이드를 볼 사람: ' + val('audience') + '\n';
+  if (val('message')) t += '- 핵심 메시지: ' + val('message') + '\n';
+  [1, 2].forEach(n => {
+    const nm = val('t' + n + '_name'); if (!nm) return;
+    t += '\n[도구 ' + n + '] ' + nm + '\n';
+    [['func', '대표 기능'], ['use', '이럴 때 써요'], ['avoid', '이럴 때는 쓰지 말아요'], ['tip', '나만의 한 줄 요령']].forEach(([k, lab]) => {
+      if (val('t' + n + '_' + k)) t += '- ' + lab + ': ' + val('t' + n + '_' + k) + '\n';
+    });
+  });
+  return t.trim();
+}
+
+document.addEventListener('input', e => { if (e.target.dataset && e.target.dataset.fid) updatePreview(); });
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.id === 'btnFill') {
+    const ta = document.querySelector('[data-fid="p_context"]'), txt = cardsText();
+    if (!txt) { alert('먼저 위의 기획과 도구 카드를 채워 주세요.'); return; }
+    if (ta.value.trim() && !confirm('맥락 칸의 내용이 도구 카드 내용으로 바뀌어요. 계속할까요?')) return;
+    ta.value = txt; updatePreview();
+  } else if (t.id === 'btnCopy') DC.copy(plainPrompt(), t);
+});
+
+const mini = (r, n) => {
+  const a = r.answers, p = 't' + n + '_';
+  if (!a[p + 'name']) return '';
+  return '<div class="mini-card"><b class="nm">' + n + '. ' + DC.esc(a[p + 'name']) + '</b>' +
+    (a[p + 'use'] ? '<div>✅ ' + DC.esc(a[p + 'use']) + '</div>' : '') +
+    (a[p + 'avoid'] ? '<div>⛔ ' + DC.esc(a[p + 'avoid']) + '</div>' : '') +
+    (a[p + 'tip'] ? '<div>💡 ' + DC.esc(a[p + 'tip']) + '</div>' : '') + '</div>';
+};
+
+DC.start({ title: '3차시 ② 디지털 도구 활용 가이드 만들기', subtitle: '도구를 고르는 나의 기준을 후배·친구에게 알려 주자' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's3/guide', title: '🛠️ 가이드 기획·제작 노트', groups: GROUPS,
+    required: ['tools', 'audience', 'message', 't1_name', 't2_name'],
+    hint: '내용은 모두 저장 버튼을 눌러야 서버에 저장돼요.',
+    onLoad: updatePreview,
+  });
+  DC.board({
+    mount: '#board', key: 's3/guide', title: '💡 친구들의 도구 카드 구경하기', sort: 'likes',
+    hint: '친구들은 어떤 도구를 어떻게 소개했을까요? 아이디어를 얻고 댓글로 이야기해 보세요.',
+    cardHtml: r => '<div class="dc-post-row"><b>👥 ' + DC.esc(r.answers.audience || '') + '</b><div><b style="display:inline;color:inherit;font-size:inherit">' + DC.esc(r.answers.message || '') + '</b></div></div>' + mini(r, 1) + mini(r, 2),
+  });
+});
+</script>
+</body>
+</html>

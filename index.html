@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미래를 여는 디지털 시민 · 2단원</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.step { display: none; }
+.step.active { display: block; }
+
+.session-card { background: var(--surface); border-radius: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+.session-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 16px 18px; cursor: pointer; user-select: none;
+}
+.session-head h3 { margin: 0; font-size: 1rem; color: var(--text); }
+.session-head .chev { color: var(--text-muted); font-size: 0.85rem; transition: transform 0.2s; }
+.session-card.open .session-head .chev { transform: rotate(180deg); }
+.session-body { display: none; padding: 0 18px 18px; }
+.session-card.open .session-body { display: block; }
+.activity-list { display: flex; flex-direction: column; gap: 8px; }
+.activity-btn {
+  display: block; text-align: center; padding: 11px; border-radius: 10px; background: var(--accent-soft);
+  color: var(--accent); text-decoration: none; font-size: 0.88rem; font-weight: 600;
+}
+.activity-btn:active { opacity: 0.8; }
+.empty-note { font-size: 0.82rem; color: var(--text-muted); padding: 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <h1>🌐 미래를 여는 디지털 시민</h1>
+    <p style="font-weight:700;color:var(--text);margin-bottom:2px">2단원 · 디지털 기술의 이해와 활용</p>
+    <p id="semLabel">불러오는 중...</p>
+  </div>
+
+  <!-- STEP 1: 로그인 -->
+  <div class="step active" id="step-login">
+    <div class="card">
+      <h2>학생 확인</h2>
+      <p class="hint">학번(4자리)과 이름을 입력해주세요. 예) 1학년 3반 5번 → 1305</p>
+      <label class="field-label" for="inputId">학번 (4자리)</label>
+      <input type="tel" id="inputId" maxlength="4" inputmode="numeric" placeholder="1305">
+      <label class="field-label" for="inputName">이름</label>
+      <input type="text" id="inputName" placeholder="홍길동">
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn" id="loginBtn" onclick="onLogin()">입장하기</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: 차시 목록 -->
+  <div class="step" id="step-main">
+    <div class="who-banner">
+      <span id="welcomeLabel"></span>
+      <button onclick="onLogout()">다른 학생으로</button>
+    </div>
+
+    <div class="card" style="font-size:0.85rem;line-height:1.6"><b>💡 대단원 질문</b><br>익숙한 도구가 늘 정답일까? 디지털 기술을 이해하고 인공지능과 협력할 때, 무엇을 중심에 두어야 할까?</div>
+
+    <div id="sessionList"></div>
+    <p style="text-align:center;margin-top:24px"><a href="teacher.html" style="font-size:0.75rem;color:var(--text-muted)">교사용 현황</a></p>
+  </div>
+</div>
+
+<script src="session.js"></script>
+<script>
+const DB_URL = 'https://gwangsu-on-default-rtdb.firebaseio.com';
+const TEACHER_ID = '3000';
+const TEACHER_NAME = '김병선';
+
+// 차시별 활동 목록 — 활동이 준비되면 links 배열에 { label, href } 형태로 추가하면 된다.
+// href는 같은 저장소 안의 다른 html 파일 경로(예: 'session1-1.html')를 넣으면 되고,
+// 그 페이지에서 session.js의 requireSrLogin()을 호출하면 여기서 확인한 학번/이름을
+// 그대로 이어받는다.
+const SESSIONS = [
+  { title: '1차시 · 디지털 도구, 어떻게 사용해야 할까? (pp.26~31)', links: [
+    { label: '① 상황 이해하기 — 블루투스로 800MB를?', href: 'session1-1.html' },
+    { label: '② 핵심 개념 탐험 + 개념 퀴즈', href: 'session1-2.html' },
+    { label: '③ 활동1 · 같은 미션, 다른 선택! (도구 비교)', href: 'session1-3.html' },
+  ] },
+  { title: '2차시 · 인공지능과 잘 협력하려면? (pp.31~35)', links: [
+    { label: '① 인공지능의 한계와 인간의 역할', href: 'session2-1.html' },
+    { label: '② 활동2 · 프롬프트 실험하기', href: 'session2-2.html' },
+  ] },
+  { title: '3차시 · 도구를 고르는 나의 기준 (pp.36~39)', links: [
+    { label: '① 무엇이 문제였을까? + 나의 원칙', href: 'session3-1.html' },
+    { label: '② 디지털 도구 활용 가이드 만들기', href: 'session3-2.html' },
+  ] },
+  { title: '4차시 · 점검·공유·성찰 (pp.39~43)', links: [
+    { label: '① 가이드 점검하고 친구 가이드 둘러보기', href: 'session4-1.html' },
+    { label: '② 성찰하기 · 정리 퀴즈 · 실천 다짐', href: 'session4-2.html' },
+  ] },
+];
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setLoginError(msg) {
+  const el = document.getElementById('loginError');
+  if (!msg) { el.classList.remove('show'); el.textContent = ''; return; }
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function renderSessions() {
+  const wrap = document.getElementById('sessionList');
+  wrap.innerHTML = SESSIONS.map((s, i) => {
+    const body = s.links.length
+      ? `<div class="activity-list">${s.links.map(l => `<a class="activity-btn" href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join('')}</div>`
+      : `<div class="empty-note">아직 등록된 활동이 없습니다.</div>`;
+    return `<div class="session-card" id="session-${i}">
+      <div class="session-head" onclick="toggleSession(${i})">
+        <h3>${esc(s.title)}</h3>
+        <span class="chev">▾</span>
+      </div>
+      <div class="session-body">${body}</div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleSession = function(i) {
+  document.getElementById('session-' + i).classList.toggle('open');
+};
+
+async function loadCurrentConfig() {
+  const res = await fetch(`${DB_URL}/config/current.json`);
+  if (!res.ok) throw new Error('설정 정보를 불러오지 못했습니다.');
+  const data = await res.json();
+  return data || { year: new Date().getFullYear(), sem: 1 };
+}
+
+window.onLogin = async function() {
+  const id = document.getElementById('inputId').value.trim();
+  const name = document.getElementById('inputName').value.trim();
+  setLoginError('');
+
+  if (!/^\d{4}$/.test(id)) { setLoginError('학번은 4자리 숫자로 입력해주세요.'); return; }
+  if (!name) { setLoginError('이름을 입력해주세요.'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = '확인 중...';
+  try {
+    const cfg = await loadCurrentConfig();
+    if (id === TEACHER_ID && name === TEACHER_NAME) {
+      const teacher = { id, name, isTeacher: true };
+      setSrStudent(teacher);
+      enterMain(cfg, teacher);
+      return;
+    }
+    const res = await fetch(`${DB_URL}/years/${cfg.year}/students/${id}.json`);
+    if (!res.ok) throw new Error('학생 명단을 불러오지 못했습니다.');
+    const rec = await res.json();
+    if (!rec || String(rec.name).trim() !== name) {
+      setLoginError('학번 또는 이름이 일치하지 않습니다. 다시 확인해주세요.');
+      return;
+    }
+    setSrStudent({ id, name: rec.name, grade: rec.grade, ban: rec.ban, num: rec.num, email: rec.email || '' });
+    enterMain(cfg, { id, name: rec.name, grade: rec.grade, ban: rec.ban, num: rec.num });
+  } catch (e) {
+    setLoginError(e.message || '확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+  } finally {
+    btn.disabled = false; btn.textContent = '입장하기';
+  }
+};
+
+window.onLogout = function() {
+  clearSrStudent();
+  document.getElementById('inputId').value = '';
+  document.getElementById('inputName').value = '';
+  setLoginError('');
+  showStep('step-login');
+};
+
+function enterMain(cfg, student) {
+  document.getElementById('semLabel').textContent = `${cfg.year}학년도 ${cfg.sem}학기`;
+  document.getElementById('welcomeLabel').textContent = `✓ ${srWhoLabel(student)}${student.isTeacher ? '' : '님'}`;
+  renderSessions();
+  showStep('step-main');
+}
+
+document.getElementById('inputId').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('inputName').focus(); }
+});
+document.getElementById('inputName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); onLogin(); }
+});
+
+window.addEventListener('DOMContentLoaded', async function() {
+  const existing = getSrStudent();
+  try {
+    const cfg = await loadCurrentConfig();
+    if (existing) {
+      enterMain(cfg, existing);
+    } else {
+      document.getElementById('semLabel').textContent = `${cfg.year}학년도 ${cfg.sem}학기`;
+    }
+  } catch (e) {
+    document.getElementById('semLabel').textContent = '불러오기 실패';
+  }
+});
+</script>
+</body>
+</html>

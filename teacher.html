@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교사용 현황 — 디지털 시민 2단원</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.wrap { max-width: 1100px; }
+.step { display: none; } .step.active { display: block; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.toolbar select { padding: 9px; border-radius: 10px; border: 1.5px solid var(--accent); font-family: inherit; font-size: 0.88rem; }
+.grid-wrap { overflow-x: auto; background: var(--surface); border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+table.grid { border-collapse: collapse; width: 100%; font-size: 0.8rem; }
+.grid th, .grid td { border-bottom: 1px solid #eef1f7; padding: 7px 8px; text-align: center; white-space: nowrap; }
+.grid th { background: #f2f4fa; position: sticky; top: 0; font-size: 0.74rem; }
+.grid td.name { text-align: left; font-weight: 600; }
+.grid td.cell { cursor: pointer; }
+.grid td.done { background: #ebfbee; color: #2f9e44; font-weight: 700; }
+.grid td.miss { color: #ccc; }
+.grid tr.sum td { background: #f8f9fc; font-weight: 700; }
+.ans-card { background: var(--surface); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font-size: 0.84rem; }
+.ans-card h4 { margin: 0 0 6px; font-size: 0.86rem; }
+.kv { display: grid; grid-template-columns: 130px 1fr; gap: 3px 10px; line-height: 1.5; }
+.kv b { color: var(--accent); font-size: 0.74rem; word-break: break-all; }
+.kv div { white-space: pre-wrap; word-break: break-word; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: none; align-items: flex-start; justify-content: center; padding: 30px 12px; overflow-y: auto; z-index: 50; }
+.modal-bg.show { display: flex; }
+.modal { background: var(--bg); border-radius: 14px; padding: 16px; max-width: 720px; width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header"><h1>🌐 디지털 시민 2단원 · 교사용 현황</h1><p id="semLabel"></p></div>
+
+  <div class="step active" id="step-pw">
+    <div class="card" style="max-width:420px;margin:0 auto">
+      <h2>비밀번호</h2>
+      <input type="password" id="pwInput">
+      <div class="error-msg" id="pwError"></div>
+      <button class="btn" onclick="checkPw()">입장</button>
+    </div>
+  </div>
+
+  <div class="step" id="step-main">
+    <div class="toolbar">
+      <select id="banSelect" onchange="loadClass()"></select>
+      <button class="btn small secondary" onclick="loadClass()">🔄 새로고침</button>
+      <button class="btn small secondary" onclick="exportCsv()">⬇️ CSV 내보내기</button>
+      <span class="dc-muted" id="loadInfo"></span>
+    </div>
+    <p class="hint">칸을 누르면 그 학생의 응답, 활동 이름을 누르면 반 전체 응답을 볼 수 있어요. 학생 페이지에서 교사 계정(3000/김병선)으로 들어가면 반을 골라 게시판·댓글을 볼 수 있어요.</p>
+    <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+    <div id="detail" style="margin-top:16px"></div>
+  </div>
+</div>
+<div class="modal-bg" id="modal" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal" id="modalBody"></div></div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+const PASSWORD = 'byung0703!';
+const ACTS = [
+  { key: 's1/situation', label: '1-① 상황 이해' },
+  { key: 's1/quiz', label: '1-② 개념 퀴즈' },
+  { key: 's1/mission', label: '1-③ 도구 비교' },
+  { key: 's2/limits', label: '2-① 한계·역할' },
+  { key: 's2/prompt', label: '2-② 프롬프트' },
+  { key: 's3/principle', label: '3-① 나의 원칙' },
+  { key: 's3/guide', label: '3-② 가이드' },
+  { key: 's4/check', label: '4-① 점검·공유' },
+  { key: 's4/reflect', label: '4-② 성찰' },
+];
+let roster = {}, data = {}, comments = {}, curBan = '';
+
+window.checkPw = function () {
+  if (document.getElementById('pwInput').value !== PASSWORD) {
+    const e = document.getElementById('pwError'); e.textContent = '비밀번호가 다릅니다.'; e.classList.add('show'); return;
+  }
+  document.getElementById('step-pw').classList.remove('active');
+  document.getElementById('step-main').classList.add('active');
+  init();
+};
+document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkPw(); });
+
+// 교사 페이지는 학생 로그인 없이 동작하도록 DC.student를 교사로 둔다.
+DC.student = { id: '3000', name: '김병선', isTeacher: true };
+
+async function init() {
+  await DC.start({ needLogin: false });
+  document.getElementById('semLabel').textContent = `${DC.cfg.year}학년도 ${DC.cfg.sem}학기`;
+  roster = await fetch(`${DC.DB_URL}/years/${DC.cfg.year}/students.json`).then(r => r.json()) || {};
+  // 반 목록 = 명단에 있는 학년-반 + 데이터에만 있는 반(테스트 등)
+  const bans = new Set(Object.values(roster).map(s => `${s.grade}-${s.ban}`));
+  const shallow = await Promise.all(ACTS.map(a => DC.get(a.key + '?shallow=true').catch(() => null)));
+  shallow.forEach(d => Object.keys(d || {}).forEach(b => bans.add(b)));
+  const list = [...bans].sort((a, b) => {
+    const [ga, ba] = a.split('-').map(Number), [gb, bb] = b.split('-').map(Number);
+    return (ga - gb) || (ba - bb) || a.localeCompare(b);
+  });
+  const sel = document.getElementById('banSelect');
+  sel.innerHTML = list.map(b => {
+    const n = shallow.reduce((s, d) => s + (d && d[b] ? 1 : 0), 0);
+    return `<option value="${DC.escAttr(b)}">${DC.esc(DC.banLabel(b))}${n ? ` · 활동 ${n}개 진행` : ''}</option>`;
+  }).join('');
+  const firstActive = list.find(b => shallow.some(d => d && d[b]));
+  if (firstActive) sel.value = firstActive;
+  loadClass();
+}
+
+window.loadClass = async function () {
+  curBan = document.getElementById('banSelect').value;
+  document.getElementById('loadInfo').textContent = '불러오는 중...';
+  const res = await Promise.all(ACTS.map(a => DC.get(`${a.key}/${curBan}`).catch(() => null)));
+  const cm = await Promise.all(ACTS.map(a => DC.get(`${a.key}__comments/${curBan}`).catch(() => null)));
+  ACTS.forEach((a, i) => { data[a.key] = res[i] || {}; comments[a.key] = cm[i] || {}; });
+  document.getElementById('loadInfo').textContent = `불러옴 ${new Date().toLocaleTimeString()}`;
+  renderGrid();
+  document.getElementById('detail').innerHTML = '';
+};
+
+function students() {
+  const map = {};
+  const [g, b] = curBan.split('-');
+  Object.entries(roster).forEach(([id, s]) => { if (String(s.grade) === g && String(s.ban) === b) map[id] = { id, name: s.name, num: s.num }; });
+  // 명단에 없지만 응답이 있는 학생(교사 테스트 등)도 표시
+  ACTS.forEach(a => Object.values(data[a.key]).forEach(r => { if (r && !map[r.id]) map[r.id] = { id: r.id, name: r.name, num: r.num || 0 }; }));
+  return Object.values(map).sort((x, y) => (x.num - y.num) || x.id.localeCompare(y.id));
+}
+
+function renderGrid() {
+  const st = students();
+  let h = '<tr><th>번호</th><th>이름</th>' + ACTS.map((a, i) => `<th><a href="#" onclick="showAct(${i});return false">${DC.esc(a.label)}</a></th>`).join('') + '<th>완료</th></tr>';
+  st.forEach(s => {
+    let done = 0;
+    h += `<tr><td>${s.num || ''}</td><td class="name">${DC.esc(s.name)}</td>`;
+    ACTS.forEach((a, i) => {
+      const r = data[a.key][s.id];
+      if (r) { done++; h += `<td class="cell done" onclick="showOne('${s.id}',${i})" title="${DC.fmtTime(r.updatedAt)}">✓${a.key === 's1/quiz' && r.answers && r.answers.score !== undefined ? ' ' + DC.esc(r.answers.score) : ''}</td>`; }
+      else h += '<td class="miss">·</td>';
+    });
+    h += `<td><b>${done}</b>/${ACTS.length}</td></tr>`;
+  });
+  h += '<tr class="sum"><td></td><td class="name">제출 인원</td>' + ACTS.map(a => `<td>${Object.keys(data[a.key]).length}</td>`).join('') + '<td></td></tr>';
+  document.getElementById('grid').innerHTML = h;
+}
+
+function kvHtml(ans) {
+  return '<div class="kv">' + Object.entries(ans || {}).filter(([, v]) => !DC.isEmpty(v)).map(([k, v]) =>
+    `<b>${DC.esc(k)}</b><div>${DC.esc(Array.isArray(v) ? v.join(', ') : typeof v === 'object' ? JSON.stringify(v) : v)}</div>`).join('') + '</div>';
+}
+function commentsHtml(key, id) {
+  const c = comments[key][id]; if (!c) return '';
+  return '<div class="dc-muted" style="margin-top:8px">💬 받은 댓글: ' + Object.values(c).sort((a, b) => a.ts - b.ts).map(x => `<b>${DC.esc(x.name)}</b> ${DC.esc(x.text)}`).join(' / ') + '</div>';
+}
+
+window.showOne = function (id, i) {
+  const a = ACTS[i], r = data[a.key][id];
+  document.getElementById('modalBody').innerHTML = `<div class="ans-card"><h4>${DC.esc(a.label)} — ${r.num || ''}번 ${DC.esc(r.name)} <span class="dc-muted">${DC.fmtTime(r.updatedAt)}</span></h4>${kvHtml(r.answers)}${commentsHtml(a.key, id)}</div>
+    <button class="btn secondary" onclick="document.getElementById('modal').classList.remove('show')">닫기</button>`;
+  document.getElementById('modal').classList.add('show');
+};
+
+window.showAct = function (i) {
+  const a = ACTS[i];
+  const recs = Object.values(data[a.key]).sort((x, y) => (x.num || 0) - (y.num || 0));
+  document.getElementById('detail').innerHTML = `<h3>${DC.esc(a.label)} · ${recs.length}명 제출</h3>` +
+    (recs.length ? recs.map(r => `<div class="ans-card"><h4>${r.num || ''}번 ${DC.esc(r.name)} <span class="dc-muted">${DC.fmtTime(r.updatedAt)}</span></h4>${kvHtml(r.answers)}${commentsHtml(a.key, r.id)}</div>`).join('') : '<div class="empty-state">아직 제출이 없어요.</div>');
+  document.getElementById('detail').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.exportCsv = function () {
+  const st = students();
+  const cols = [];
+  ACTS.forEach(a => {
+    const keys = new Set();
+    Object.values(data[a.key]).forEach(r => Object.keys(r.answers || {}).forEach(k => keys.add(k)));
+    [...keys].forEach(k => cols.push({ key: a.key, field: k, head: `${a.label}:${k}` }));
+  });
+  const q = v => '"' + String(v === undefined || v === null ? '' : Array.isArray(v) ? v.join(', ') : v).replace(/"/g, '""') + '"';
+  const lines = [['학번', '번호', '이름', ...cols.map(c => c.head)].map(q).join(',')];
+  st.forEach(s => lines.push([s.id, s.num, s.name, ...cols.map(c => { const r = data[c.key][s.id]; return r && r.answers ? r.answers[c.field] : ''; })].map(q).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `디지털시민_2단원_${DC.banLabel(curBan).replace(/\s/g, '')}.csv`; a.click();
+};
+</script>
+</body>
+</html>

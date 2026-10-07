@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1차시 ② 핵심 개념 탐험 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.panel { display: none; }
+.panel.active { display: block; }
+.flow { display: flex; flex-direction: column; align-items: stretch; gap: 4px; margin: 10px 0; }
+.flow .node { background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 8px 12px; text-align: center; font-weight: 700; font-size: 0.82rem; }
+.flow .node.dc { background: var(--accent); color: #fff; }
+.flow .arrow { text-align: center; font-size: 0.76rem; color: var(--text-muted); }
+.chip { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 0 7px; font-weight: 700; font-size: 0.8rem; }
+.term-grid { display: grid; grid-template-columns: 70px 1fr; gap: 6px 10px; font-size: 0.84rem; }
+.term-grid b { color: var(--accent); }
+.rv { border-radius: 10px; padding: 10px 12px; margin: 8px 0; font-size: 0.84rem; line-height: 1.6; background: #f6f8fc; border-left: 4px solid var(--border); }
+.rv.ok { background: #ebfbee; border-left-color: #2f9e44; }
+.rv.ng { background: var(--danger-soft); border-left-color: var(--danger); }
+.rv .why { color: #444; margin-top: 4px; }
+.scorebox { text-align: center; font-size: 1.1rem; font-weight: 800; color: var(--accent); margin: 10px 0 4px; }
+.stat-sum { display: flex; gap: 8px; margin-bottom: 10px; }
+.stat-sum div { flex: 1; background: var(--surface); border-radius: 12px; padding: 10px; text-align: center; font-size: 0.78rem; color: var(--text-muted); }
+.stat-sum b { display: block; font-size: 1.25rem; color: var(--accent); }
+.worst { background: #fff8e6; border-left: 4px solid #f0b429; border-radius: 8px; padding: 10px 12px; font-size: 0.84rem; line-height: 1.6; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-p="p1">디지털 기술</button>
+    <button class="tab-btn" data-p="p2">인공지능</button>
+    <button class="tab-btn" data-p="p3">무선 네트워크</button>
+    <button class="tab-btn" data-p="p4">초연결 환경</button>
+  </div>
+
+  <div class="panel active" id="p1">
+    <div class="concept">
+      <h3>💾 디지털 기술 (p.29)</h3>
+      <p style="margin:0">문자·소리·이미지 등의 정보를 <span class="chip">0과 1</span>로 표현하여 처리·저장·전달하는 기술이에요. 디지털 기기는 <b>하드웨어</b>와 <b>소프트웨어</b>가 함께 작동해요.</p>
+      <table>
+        <tr><th>구분</th><th>뜻</th><th>예</th></tr>
+        <tr><td><b>하드웨어</b></td><td>정보를 처리하거나 소프트웨어를 실행하는 물리적 장치</td><td>스마트폰, 노트북, 태블릿</td></tr>
+        <tr><td><b>소프트웨어</b></td><td>하드웨어에서 실행되어 다양한 기능을 수행하는 프로그램</td><td>메모 앱, 웹 브라우저, 동영상 앱</td></tr>
+      </table>
+      <p class="dc-muted" style="margin:0">💡 눈에 보이고 손으로 만질 수 있으면 하드웨어, 그 안에서 돌아가는 프로그램이면 소프트웨어!</p>
+    </div>
+  </div>
+
+  <div class="panel" id="p2">
+    <div class="concept">
+      <h3>🤖 인공지능과 생성형 인공지능 (p.29)</h3>
+      <p style="margin:0">입력된 정보를 바탕으로 <b>추론</b>하여 결과를 예측하거나 대상을 분류하고, 정보를 추천하거나 새로운 내용을 생성하는 기술이에요. 그중 <b>생성형 인공지능</b>은 학습한 데이터의 패턴을 바탕으로 글·이미지·소리 등 <b>새로운 콘텐츠를 만드는</b> 인공지능이에요.</p>
+      <table>
+        <tr><th>구현 방식</th><th>특징</th><th>예</th></tr>
+        <tr><td><b>규칙 기반</b></td><td>사람이 판단 규칙을 직접 정함</td><td>규칙 기반 챗봇, 전문가 시스템</td></tr>
+        <tr><td><b>기계학습 기반</b></td><td>데이터에서 패턴을 학습함</td><td>사진 분류, 음성 인식, 생성형 인공지능</td></tr>
+      </table>
+      <p class="dc-muted" style="margin:0 0 8px">실제 인공지능 시스템은 두 방식을 함께 쓰기도 해요.</p>
+      <div class="term-grid">
+        <b>인공지능</b><span>인간의 인지 활동을 모방한 기술</span>
+        <b>추론</b><span>학습한 패턴으로 새 입력을 판단·예측하는 것</span>
+        <b>학습</b><span>대량의 데이터를 분석해 규칙·패턴을 스스로 익히는 것</span>
+        <b>패턴</b><span>데이터 속에 반복되는 규칙·특징</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="p3">
+    <div class="concept">
+      <h3>📶 무선 네트워크 (p.30)</h3>
+      <p style="margin:0">케이블 없이 데이터를 주고받게 하는 통신 방식이에요.</p>
+      <table>
+        <tr><th>구분</th><th>와이파이(WiFi)</th><th>블루투스(Bluetooth)</th></tr>
+        <tr><td>연결 방법</td><td>주로 무선 공유기를 통해 네트워크에 연결</td><td>주로 가까운 기기끼리 직접 연결</td></tr>
+        <tr><td>주요 특징</td><td>일반적으로 전송 속도가 빠르며 대용량 데이터를 주고받기에 적합</td><td>일반적으로 전력 소비가 적으며 가까운 기기 사이에서 소용량 데이터를 주고받기에 적합</td></tr>
+        <tr><td>활용 예</td><td>인터넷 검색, 온라인 동영상 시청, 클라우드 파일 공유</td><td>무선 이어폰·키보드 연결, 가까운 기기 사이 파일 전송</td></tr>
+      </table>
+      <p class="dc-muted" style="margin:0">와이파이는 인터넷 자체가 아니라 기기를 무선 네트워크에 연결하는 기술이에요. 실제 성능은 기기 규격과 사용 환경에 따라 달라요.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="p4">
+    <div class="concept">
+      <h3>🌐 초연결 환경과 데이터 센터 (p.30)</h3>
+      <p style="margin:0">사람·사물·정보가 네트워크로 촘촘히 연결되어 끊임없이 데이터가 오가는 환경이에요. 우리의 요청은 <b>데이터 센터</b>(대규모 서버·저장장치를 갖춘 시설)의 서버에서 처리되어 결과가 기기로 돌아와요.</p>
+      <div class="flow">
+        <div class="node">📱 스마트폰 · 태블릿 · 노트북 · 데스크톱</div>
+        <div class="arrow">▼ 검색어 · 질문</div>
+        <div class="node dc">🏢 데이터 센터 (서버가 요청 처리)</div>
+        <div class="arrow">▼ 검색 결과 · 답변</div>
+        <div class="node">📱 내 기기에 결과 표시</div>
+      </div>
+      <p style="margin:0">같은 내용을 찾아도 <b>검색 엔진과 AI 도구의 결과는 다를 수 있어요.</b> 목적에 맞는 도구를 고르고, 결과가 믿을 만한지 확인해야 해요.</p>
+    </div>
+  </div>
+
+  <div id="form"></div>
+  <div id="review"></div>
+  <div id="stats"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+const HW = ['하드웨어', '소프트웨어'], AI = ['규칙 기반', '기계학습 기반'], NET = ['와이파이', '블루투스'];
+const QUIZ = [
+  { id: 'q1', s: '스마트폰', q: '스마트폰은 하드웨어일까, 소프트웨어일까?', opts: HW, a: '하드웨어', why: '스마트폰은 눈에 보이고 만질 수 있는 물리적 장치예요.' },
+  { id: 'q2', s: '메모 앱', q: '메모 앱은 하드웨어일까, 소프트웨어일까?', opts: HW, a: '소프트웨어', why: '메모 앱은 하드웨어에서 실행되어 기능을 수행하는 프로그램이에요.' },
+  { id: 'q3', s: '규칙 기반 챗봇', q: '사람이 정한 판단 규칙에 따라 답하는 챗봇은 어떤 방식일까?', opts: AI, a: '규칙 기반', why: '규칙 기반은 사람이 판단 규칙을 직접 정해 줘요. 규칙 기반 챗봇이 대표적인 예예요.' },
+  { id: 'q4', s: '사진 분류', q: '많은 사진 데이터에서 패턴을 학습해 고양이 사진을 분류하는 인공지능은 어떤 방식일까?', opts: AI, a: '기계학습 기반', why: '데이터에서 패턴을 학습하는 것이 기계학습 기반이에요. 사진 분류, 음성 인식, 생성형 AI가 해당돼요.' },
+  { id: 'q5', s: '무선 이어폰', q: '스마트폰에 무선 이어폰을 연결할 때 주로 쓰는 무선 기술은?', opts: NET, a: '블루투스', why: '블루투스는 가까운 기기끼리 직접 연결하며 전력 소비가 적어요. 무선 이어폰·키보드 연결에 알맞아요.' },
+  { id: 'q6', s: '동영상 시청', q: '온라인 동영상을 시청할 때 주로 쓰는 무선 기술은?', opts: NET, a: '와이파이', why: '와이파이는 공유기를 통해 네트워크에 연결해 인터넷 검색, 동영상 시청에 알맞아요.' },
+  { id: 'q7', s: '800MB 전송', q: '800MB 학습 자료를 여러 명에게 클라우드에 올려 링크로 공유하려 한다. 이때 쓰는 무선 기술은?', opts: NET, a: '와이파이', why: '대용량 데이터는 전송 속도가 빠른 와이파이로 클라우드에 올려 공유하는 것이 더 빠르고 안정적이에요.' },
+  { id: 'q8', s: '생성형 AI 정의', q: '생성형 인공지능을 가장 알맞게 설명한 것은?', opts: ['정해진 규칙에 따라 정해진 답만 말하는 기술', '학습한 데이터의 패턴을 바탕으로 글·이미지·소리 등 새로운 콘텐츠를 만드는 기술', '사람이 직접 모든 답을 입력해 두는 데이터베이스', '와이파이로 기기를 연결해 주는 기술'], a: '학습한 데이터의 패턴을 바탕으로 글·이미지·소리 등 새로운 콘텐츠를 만드는 기술', why: '생성형 인공지능은 학습한 패턴을 바탕으로 새로운 콘텐츠를 만들어 내요.' },
+];
+const FIELDS = QUIZ.map((x, i) => ({ id: x.id, type: 'radio', label: (i + 1) + '. ' + x.q, options: x.opts, short: x.s }));
+const calcScore = (ans) => QUIZ.filter(x => ans[x.id] === x.a).length;
+let mine = null;
+
+document.querySelectorAll('#tabs .tab-btn').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#tabs .tab-btn').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === b.dataset.p));
+});
+
+function showReview(ans) {
+  const sc = calcScore(ans);
+  document.getElementById('review').innerHTML = '<div class="card"><h2>📝 채점 결과</h2><div class="scorebox">' + sc + ' / ' + QUIZ.length + '점</div>' +
+    QUIZ.map((x, i) => {
+      const ok = ans[x.id] === x.a;
+      return '<div class="rv ' + (ok ? 'ok' : 'ng') + '"><b>' + (ok ? '⭕' : '❌') + ' ' + (i + 1) + '. ' + DC.esc(x.s) + '</b><br>내 답: ' + DC.esc(ans[x.id] || '(선택 안 함)') +
+        (ok ? '' : '<br>정답: <b>' + DC.esc(x.a) + '</b>') + '<div class="why">💡 ' + DC.esc(x.why) + '</div></div>';
+    }).join('') + '<p class="hint" style="margin:8px 0 0">답을 바꿔 다시 저장하면 점수가 새로 계산돼요.</p></div>';
+}
+
+function paintStats(recs) {
+  const list = Object.keys(recs || {}).map(k => recs[k]).filter(r => r && r.answers);
+  const n = list.length;
+  if (!n) { document.getElementById('stats').innerHTML = ''; return; }
+  const rates = QUIZ.map(x => Math.round(list.filter(r => r.answers[x.id] === x.a).length / n * 100));
+  const minRate = Math.min.apply(null, rates);
+  const avg = (list.reduce((s, r) => s + calcScore(r.answers), 0) / n).toFixed(1);
+  const items = QUIZ.map((x, i) => ({ label: (i + 1) + '. ' + x.s, value: rates[i], highlight: rates[i] === minRate && minRate < 100 }));
+  const wi = rates.indexOf(minRate), w = QUIZ[wi];
+  document.getElementById('stats').innerHTML = '<div class="dc-board"><div class="dc-board-title">📊 우리 반 퀴즈 결과</div>' +
+    '<div class="stat-sum"><div><b>' + n + '명</b>참여</div><div><b>' + avg + '점</b>반 평균 (' + QUIZ.length + '점 만점)</div></div>' +
+    DC.barsHtml(items, { title: '문항별 정답률', unit: '%', max: 100 }) +
+    (minRate < 100 ? '<div class="worst">🔍 가장 많이 틀린 문항: <b>' + (wi + 1) + '번 ' + DC.esc(w.s) + '</b> (정답률 ' + minRate + '%)<br>💡 ' + DC.esc(w.why) + '</div>' : '<div class="worst">🎉 모든 문항을 우리 반 모두가 맞혔어요!</div>') +
+    '<p class="dc-muted" style="margin-top:8px">10초마다 자동으로 새로 고쳐져요.</p></div>';
+}
+function refreshStats() {
+  const box = document.getElementById('stats');
+  if (!mine && !DC.student.isTeacher) {
+    box.innerHTML = '<div class="dc-locked">🔒 퀴즈를 풀고 저장하면 우리 반 정답률을 볼 수 있어요.</div>'; return;
+  }
+  DC.get('s1/quiz/' + DC.myBan()).then(paintStats).catch(() => {});
+}
+
+DC.start({ title: '1차시 ② 핵심 개념 탐험', subtitle: '디지털 기술 · 인공지능 · 무선 네트워크 (pp.29–30)' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's1/quiz', title: '🎯 개념 퀴즈', fields: FIELDS, required: QUIZ.map(x => x.id),
+    hint: '위에서 탐험한 개념으로 풀어 보세요. 저장하면 바로 채점하고 해설을 보여 줘요.', saveLabel: '💾 저장하고 채점하기',
+    validate: (ans) => { ans.score = calcScore(ans); return ''; },   // 저장 직전에 점수를 answers에 함께 기록
+    onLoad: (rec) => { if (rec && rec.answers) { mine = rec; showReview(rec.answers); } refreshStats(); },
+    onSaved: (rec) => { mine = rec; showReview(rec.answers); refreshStats(); document.getElementById('review').scrollIntoView({ behavior: 'smooth' }); },
+  });
+  setInterval(() => { if (!document.hidden) refreshStats(); }, 10000);
+});
+</script>
+</body>
+</html>

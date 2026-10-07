@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3차시 ① 문제 장면 찾고 나의 원칙 세우기 — 디지털 시민</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.cn-card { border-radius: 18px; padding: 16px 16px 14px; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.12); position: relative; overflow: hidden; }
+.cn-card.c1 { background: linear-gradient(135deg, #4c6ef5, #7950f2); }
+.cn-card.c2 { background: linear-gradient(135deg, #f76707, #e03131); }
+.cn-card.c3 { background: linear-gradient(135deg, #12b886, #1c7ed6); }
+.cn-card .no { display: inline-block; background: rgba(255,255,255,0.25); border-radius: 999px; padding: 2px 10px; font-size: 0.74rem; font-weight: 800; letter-spacing: 1px; }
+.cn-card .emoji { position: absolute; right: 12px; top: 6px; font-size: 2.6rem; opacity: 0.35; }
+.cn-card .ttl { font-size: 1.15rem; font-weight: 800; margin: 8px 0 8px; line-height: 1.35; }
+.cn-card .body { font-size: 0.88rem; line-height: 1.65; background: rgba(255,255,255,0.16); border-radius: 12px; padding: 10px 12px; }
+.dc-info:has(.cn-card) { background: none; border: 0; padding: 0; margin: 16px 0 4px; }
+.dc-info:has(.principle-box) { background: #f3f0ff; border-left-color: #7950f2; }
+.principle-box { font-size: 1.05rem; font-weight: 800; color: #5f3dc4; text-align: center; padding: 6px 0; }
+.ex-line { font-size: 0.84rem; line-height: 1.6; margin: 4px 0; padding-left: 4px; }
+.pr-card { font-size: 1.02rem; font-weight: 800; line-height: 1.55; color: #5f3dc4; background: #f3f0ff; border-radius: 12px; padding: 12px 14px; }
+.top3 { background: linear-gradient(135deg, #fff9db, #fff3bf); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.top3 h3 { margin: 0 0 8px; font-size: 0.95rem; color: #e67700; }
+.top3 .row { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; font-size: 0.92rem; font-weight: 700; line-height: 1.5; }
+.top3 .medal { font-size: 1.3rem; flex: none; }
+.top3 .meta { display: block; font-size: 0.72rem; color: var(--text-muted); font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="dc-head"></div>
+
+  <div class="concept">
+    <h3>🧭 도구는 익숙한 것이 정답일까? (p.36)</h3>
+    <p style="margin:0">중요한 것은 <b>익숙한 도구</b>가 아니라 <b>목적과 상황에 맞는 도구</b>를 고르고, 인공지능과 함께 만든 결과를 <b>스스로 점검</b>하는 것이에요. 아래 세 장의 카드 뉴스를 보고 무엇이 문제였는지 찾아 보세요.</p>
+  </div>
+
+  <div id="form"></div>
+  <div id="board"></div>
+</div>
+
+<script src="session.js"></script>
+<script src="dc.js"></script>
+<script>
+function cardNews(cls, no, emoji, title, body) {
+  return '<div class="cn-card ' + cls + '"><span class="no">CARD ' + no + '</span><span class="emoji">' + emoji + '</span>' +
+    '<div class="ttl">' + title + '</div><div class="body">' + body + '</div></div>';
+}
+const GROUPS = [
+  { title: '📰 카드 뉴스 속 문제 찾기', fields: [
+    { type: 'info', html: cardNews('c1', 1, '🚶', '걸어서 40분이라니', '새로 생긴 스터디 카페를 모둠 활동 장소로 정하려고 <b>\'학교 근처 스터디 카페\'</b>를 검색했다. 결과가 너무 많아 대충 골랐더니 <b>걸어서 40분 거리</b>였다.') },
+    { id: 'case1', type: 'textarea', rows: 2, short: '① 걸어서 40분이라니', label: '① 무엇이 문제였을까?' },
+    { type: 'info', html: cardNews('c2', 2, '🙋', '발표 중에 손이 번쩍', '인공지능 챗봇의 답을 <b>그대로</b> 발표 슬라이드에 넣었다. 발표 도중 친구가 물었다. <b>"그 연도 교과서랑 다른데?"</b> 챗봇이 지어낸 내용이었다.') },
+    { id: 'case2', type: 'textarea', rows: 2, short: '② 발표 중에 손이 번쩍', label: '② 무엇이 문제였을까?' },
+    { type: 'info', html: cardNews('c3', 3, '📁', '\'최종\'이 세 개라니', '모둠 발표 자료를 단체 채팅방으로 주고받으며 각자 받은 파일을 고쳤다. 발표 전날 채팅방에는 <b>\'최종\', \'진짜최종\', \'진짜최종(수정본2)\'</b>까지 생겼고, 무엇이 진짜인지 아무도 몰랐다.') },
+    { id: 'case3', type: 'textarea', rows: 2, short: '③ \'최종\'이 세 개라니', label: '③ 무엇이 문제였을까?' },
+  ] },
+  { title: '✍️ 나의 도구 선택·활용 원칙', fields: [
+    { type: 'info', html: '세 가지 카드 뉴스를 보고, 도구를 선택하고 활용할 때 나의 원칙을 <b>한 문장</b>으로 세워 보세요.' +
+      '<div class="ex-line">💡 예시 1: 익숙한 도구보다 목적에 맞는 도구를 고른다.</div>' +
+      '<div class="ex-line">💡 예시 2: 나는 해야 할 일과 함께 사용할 사람을 생각해 알맞은 도구를 고르고, 정보가 정확하고 최신인지 확인한 뒤 사용한다.</div>' },
+    { type: 'info', html: '<div class="principle-box">나는 ______ 한다.</div>' },
+    { id: 'principle', type: 'textarea', rows: 3, short: '나의 원칙', label: '나의 원칙', prefix: '', placeholder: '나는 ○○○ 한다.' },
+  ] },
+];
+
+let bd;
+function likeCount(id) { return Object.keys((bd && bd.state.likes[id]) || {}).length; }
+
+DC.start({ title: '3차시 ① 문제 장면 찾고 나의 원칙 세우기', subtitle: '도구를 고르는 나의 원칙, 어떻게 나눌 수 있을까?' }).then(() => {
+  DC.form({
+    mount: '#form', key: 's3/principle', title: '✏️ 내 생각 적기', groups: GROUPS,
+    required: ['case1', 'case2', 'case3', 'principle'],
+    validate: a => /^\s*나는\s*$/.test(a.principle) ? '"나는 ______ 한다." 빈칸을 채워 문장을 완성해 주세요.' : '',
+  });
+  bd = DC.board({
+    mount: '#board', key: 's3/principle', title: '🌟 우리 반 친구들의 원칙', sort: 'likes',
+    hint: '공감 가는 원칙에 ❤️를 눌러 주세요. 가장 많은 공감을 받은 원칙이 TOP 3에 올라가요.',
+    cardHtml: r => '<div class="pr-card">' + DC.nl2br(r.answers.principle) + '</div>',
+    extraTop: list => {
+      const mine = list.some(r => r.id === DC.student.id) || DC.student.isTeacher;
+      if (!mine || !list.length) return '';
+      const top = list.slice().sort((a, b) => likeCount(b.id) - likeCount(a.id) || b.updatedAt - a.updatedAt)
+        .filter(r => likeCount(r.id) > 0).slice(0, 3);
+      const medals = ['🥇', '🥈', '🥉'];
+      return '<div class="top3"><h3>🏆 우리 반 원칙 TOP 3</h3>' + (top.length ? top.map((r, i) =>
+        '<div class="row"><span class="medal">' + medals[i] + '</span><div>' + DC.nl2br(r.answers.principle) +
+        '<span class="meta">' + DC.esc(r.name) + ' · ❤️ ' + likeCount(r.id) + '</span></div></div>').join('') :
+        '<div class="dc-muted">아직 좋아요를 받은 원칙이 없어요. 마음에 드는 원칙에 ❤️를 눌러 보세요!</div>') + '</div>';
+    },
+  });
+});
+</script>
+</body>
+</html>
