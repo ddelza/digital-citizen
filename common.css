@@ -109,3 +109,6 @@ input:focus, textarea:focus { border-color: var(--accent); }
 .tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; position: sticky; top: 0; background: var(--bg); padding: 6px 0; z-index: 5; }
 .tab-btn { flex: none; padding: 8px 12px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface); font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; }
 .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.dc-guest-bar { background: #fff4e6; border: 1.5px solid #ffc078; color: #a85d00; border-radius: 10px; padding: 9px 12px; font-size: 0.8rem; line-height: 1.55; margin: -6px 0 16px; }
+.btn.guest { background: #fff4e6; color: #a85d00; border: 1.5px dashed #ffc078; }

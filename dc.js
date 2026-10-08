@@ -40,14 +40,54 @@
     if (i >= 0) { q = p.slice(i); p = p.slice(0, i); }
     return DB_URL + '/years/' + DC.cfg.year + '/dcitizen/' + UNIT + '/' + p + '.json' + q;
   };
-  DC.get = function (p) { return fetch(DC.url(p)).then(function (r) { if (!r.ok) throw new Error('불러오기 실패'); return r.json(); }); };
-  DC.put = function (p, v) { return fetch(DC.url(p), { method: 'PUT', body: JSON.stringify(v) }).then(function (r) { if (!r.ok) throw new Error('저장 실패'); return r.json(); }); };
-  DC.patch = function (p, v) { return fetch(DC.url(p), { method: 'PATCH', body: JSON.stringify(v) }).then(function (r) { if (!r.ok) throw new Error('저장 실패'); return r.json(); }); };
-  DC.post = function (p, v) { return fetch(DC.url(p), { method: 'POST', body: JSON.stringify(v) }).then(function (r) { if (!r.ok) throw new Error('저장 실패'); return r.json(); }); };
-  DC.del = function (p) { return fetch(DC.url(p), { method: 'DELETE' }); };
+  // 체험 모드(로그인 없이 체험하기): 서버에 아무것도 보내지 않고 이 탭의 메모리에만 담는다.
+  // 친구들의 실제 응답도 읽지 않는다(로그인 안 한 사람에게 학생 이름·글이 보이면 안 되므로).
+  // 새로고침하면 사라진다.
+  DC.isGuest = function () { return !!(DC.student && DC.student.isGuest); };
+  var mem = {};
+  function memSplit(p) { return p.split('?')[0].split('/').filter(Boolean); }
+  function memGet(p) {
+    var shallow = p.indexOf('shallow=true') >= 0, cur = mem;
+    memSplit(p).forEach(function (k) { cur = (cur && typeof cur === 'object') ? cur[k] : undefined; });
+    if (cur === undefined) return null;
+    cur = JSON.parse(JSON.stringify(cur));
+    if (shallow && cur && typeof cur === 'object') Object.keys(cur).forEach(function (k) { cur[k] = true; });
+    return cur;
+  }
+  function memSet(p, v, merge) {
+    var ks = memSplit(p), last = ks.pop(), cur = mem;
+    ks.forEach(function (k) { if (!cur[k] || typeof cur[k] !== 'object') cur[k] = {}; cur = cur[k]; });
+    v = v === null || v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+    if (v === undefined) delete cur[last];
+    else if (merge && cur[last] && typeof cur[last] === 'object') Object.keys(v).forEach(function (k) { cur[last][k] = v[k]; });
+    else cur[last] = v;
+  }
+  var memSeq = 0;
+  function guestOp(fn) { return new Promise(function (res) { setTimeout(function () { res(fn()); }, 120); }); }
+
+  DC.get = function (p) {
+    if (DC.isGuest()) return guestOp(function () { return memGet(p); });
+    return fetch(DC.url(p)).then(function (r) { if (!r.ok) throw new Error('불러오기 실패'); return r.json(); });
+  };
+  DC.put = function (p, v) {
+    if (DC.isGuest()) return guestOp(function () { memSet(p, v); return v; });
+    return fetch(DC.url(p), { method: 'PUT', body: JSON.stringify(v) }).then(function (r) { if (!r.ok) throw new Error('저장 실패'); return r.json(); });
+  };
+  DC.patch = function (p, v) {
+    if (DC.isGuest()) return guestOp(function () { memSet(p, v, true); return v; });
+    return fetch(DC.url(p), { method: 'PATCH', body: JSON.stringify(v) }).then(function (r) { if (!r.ok) throw new Error('저장 실패'); return r.json(); });
+  };
+  DC.post = function (p, v) {
+    if (DC.isGuest()) return guestOp(function () { var k = 'g' + Date.now() + (++memSeq); memSet(p + '/' + k, v); return { name: k }; });
+    return fetch(DC.url(p), { method: 'POST', body: JSON.stringify(v) }).then(function (r) { if (!r.ok) throw new Error('저장 실패'); return r.json(); });
+  };
+  DC.del = function (p) {
+    if (DC.isGuest()) return guestOp(function () { memSet(p, null); return null; });
+    return fetch(DC.url(p), { method: 'DELETE' });
+  };
 
   // 반 키 = '학년-반' (예: '1-3'). 학년이 달라도 반 번호가 겹치므로 반드시 학년을 포함한다.
-  DC.myBan = function () { return DC.student.isTeacher ? TEACHER_BAN : (DC.student.grade + '-' + DC.student.ban); };
+  DC.myBan = function () { if (DC.student.isGuest) return 'guest'; return DC.student.isTeacher ? TEACHER_BAN : (DC.student.grade + '-' + DC.student.ban); };
   DC.banLabel = function (b) { if (b === TEACHER_BAN) return '교사 테스트'; var p = String(b).split('-'); return p.length === 2 ? p[0] + '학년 ' + p[1] + '반' : b + '반'; };
 
   // ---------- 페이지 시작 ----------
@@ -66,7 +106,8 @@
           '<div class="header"><h1>' + DC.esc(opts.title || '미래를 여는 디지털 시민') + '</h1>' +
           (opts.subtitle ? '<p>' + DC.esc(opts.subtitle) + '</p>' : '') + '</div>' +
           (DC.student ? '<div class="who-banner"><span>✓ ' + DC.esc(window.srWhoLabel(DC.student)) + '</span>' +
-            '<div class="links"><a href="index.html">← 활동 목록</a></div></div>' : '');
+            '<div class="links"><a href="index.html">← 활동 목록</a></div></div>' : '') +
+          (DC.isGuest() ? '<div class="dc-guest-bar">🧪 <b>체험 모드</b> — 모든 활동을 해 볼 수 있지만 <b>서버에 저장되지 않아요.</b> 새로고침하거나 페이지를 나가면 입력한 내용이 사라지고, 친구들의 글도 보이지 않아요.</div>' : '');
       }
       return DC.cfg;
     });
@@ -181,11 +222,11 @@
       var box = document.getElementById(formId + '_saved');
       if (!box) return;
       var rec = api.record;
-      if (!rec || !rec.answers) { box.innerHTML = '<div class="dc-saved-title">💾 서버에 저장된 내용</div><div class="dc-muted">아직 저장한 내용이 없어요.</div>'; return; }
+      if (!rec || !rec.answers) { box.innerHTML = '<div class="dc-saved-title">' + (DC.isGuest() ? '🧪 체험 모드 (저장 안 됨)' : '💾 서버에 저장된 내용') + '</div><div class="dc-muted">' + (DC.isGuest() ? '버튼을 누르면 결과를 이 화면에서만 확인할 수 있어요.' : '아직 저장한 내용이 없어요.') + '</div>'; return; }
       var rows = fields.filter(function (f) { return f.type !== 'info' && !DC.isEmpty(rec.answers[f.id]); }).map(function (f) {
         return '<div class="dc-saved-row"><b>' + DC.esc(f.short || f.label) + '</b><div>' + DC.nl2br(DC.answerText(f, rec.answers[f.id])) + '</div></div>';
       }).join('');
-      box.innerHTML = '<div class="dc-saved-title">💾 서버에 저장된 내용 <span class="dc-muted">(' + DC.fmtTime(rec.updatedAt) + ')</span></div>' + rows;
+      box.innerHTML = '<div class="dc-saved-title">' + (DC.isGuest() ? '🧪 체험 모드 임시 내용 <span class="dc-muted">(저장 안 됨)</span>' : '💾 서버에 저장된 내용 <span class="dc-muted">(' + DC.fmtTime(rec.updatedAt) + ')</span>') + '</div>' + rows;
     }
     api.values = function () {
       var ans = {};
@@ -210,7 +251,7 @@
       DC.put(path, rec).then(function () {
         api.record = rec;
         renderSaved();
-        ok.textContent = '저장되었어요! (' + DC.fmtTime(rec.updatedAt) + ')';
+        ok.textContent = DC.isGuest() ? '🧪 체험 모드라 서버에는 저장되지 않았어요. (이 화면에서만 임시로 보여요)' : '저장되었어요! (' + DC.fmtTime(rec.updatedAt) + ')';
         ok.classList.add('show');
         if (opts.onSaved) opts.onSaved(rec, api);
         document.dispatchEvent(new CustomEvent('dc-saved', { detail: { key: opts.key, record: rec } }));
@@ -284,7 +325,7 @@
       top.innerHTML = opts.extraTop ? opts.extraTop(list) : '';
       var listEl = document.getElementById(bid + '_list');
       if (opts.requireOwn !== false && !mine && !isT) {
-        listEl.innerHTML = '<div class="dc-locked">🔒 내 답을 먼저 저장하면 우리 반 친구들(' + list.length + '명)의 생각을 볼 수 있어요.</div>';
+        listEl.innerHTML = DC.isGuest() ? '<div class="dc-locked">🧪 체험 모드 — 답을 저장해 보면 여기에 게시판 카드가 어떻게 보이는지 확인할 수 있어요. (실제 수업에서는 우리 반 친구들의 글이 함께 보여요)</div>' : '<div class="dc-locked">🔒 내 답을 먼저 저장하면 우리 반 친구들(' + list.length + '명)의 생각을 볼 수 있어요.</div>';
         return;
       }
       if (!list.length) { listEl.innerHTML = '<div class="empty-state">아직 올라온 글이 없어요.</div>'; return; }

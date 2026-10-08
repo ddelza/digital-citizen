@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>미래를 여는 디지털 시민 · 2단원</title>
-<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="common.css?v=2">
 <style>
 .step { display: none; }
 .step.active { display: block; }
@@ -48,6 +48,8 @@
       <input type="text" id="inputName" placeholder="홍길동">
       <div class="error-msg" id="loginError"></div>
       <button class="btn" id="loginBtn" onclick="onLogin()">입장하기</button>
+      <button class="btn guest" onclick="onGuest()">🧪 로그인 없이 체험하기</button>
+      <p class="hint" style="margin:8px 0 0;text-align:center">체험 모드에서는 모든 활동을 해 볼 수 있지만 입력한 내용은 저장되지 않아요.</p>
     </div>
   </div>
 
@@ -55,7 +57,7 @@
   <div class="step" id="step-main">
     <div class="who-banner">
       <span id="welcomeLabel"></span>
-      <button onclick="onLogout()">다른 학생으로</button>
+      <button onclick="onLogout()" id="logoutBtn">다른 학생으로</button>
     </div>
 
     <div class="card" style="font-size:0.85rem;line-height:1.6"><b>💡 대단원 질문</b><br>익숙한 도구가 늘 정답일까? 디지털 기술을 이해하고 인공지능과 협력할 때, 무엇을 중심에 두어야 할까?</div>
@@ -65,7 +67,7 @@
   </div>
 </div>
 
-<script src="session.js"></script>
+<script src="session.js?v=2"></script>
 <script>
 const DB_URL = 'https://gwangsu-on-default-rtdb.firebaseio.com';
 const TEACHER_ID = '3000';
@@ -173,6 +175,12 @@ window.onLogin = async function() {
   }
 };
 
+window.onGuest = async function() {
+  const guest = { id: 'guest', name: '체험', isGuest: true };
+  setSrStudent(guest);
+  try { enterMain(await loadCurrentConfig(), guest); } catch (e) { setLoginError('설정 정보를 불러오지 못했습니다.'); }
+};
+
 window.onLogout = function() {
   clearSrStudent();
   document.getElementById('inputId').value = '';
@@ -183,7 +191,8 @@ window.onLogout = function() {
 
 function enterMain(cfg, student) {
   document.getElementById('semLabel').textContent = `${cfg.year}학년도 ${cfg.sem}학기`;
-  document.getElementById('welcomeLabel').textContent = `✓ ${srWhoLabel(student)}${student.isTeacher ? '' : '님'}`;
+  document.getElementById('welcomeLabel').textContent = `✓ ${srWhoLabel(student)}${student.isTeacher || student.isGuest ? '' : '님'}`;
+  document.getElementById('logoutBtn').textContent = student.isGuest ? '체험 끝내고 로그인하기' : '다른 학생으로';
   renderSessions();
   showStep('step-main');
 }
