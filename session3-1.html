@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3차시 ① 문제 장면 찾고 나의 원칙 세우기 — 디지털 시민</title>
-<link rel="stylesheet" href="common.css?v=2">
+<link rel="stylesheet" href="common.css?v=4">
 <style>
 .cn-card { border-radius: 18px; padding: 16px 16px 14px; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.12); position: relative; overflow: hidden; }
 .cn-card.c1 { background: linear-gradient(135deg, #4c6ef5, #7950f2); }
@@ -39,8 +39,8 @@
   <div id="board"></div>
 </div>
 
-<script src="session.js?v=2"></script>
-<script src="dc.js?v=2"></script>
+<script src="session.js?v=4"></script>
+<script src="dc.js?v=4"></script>
 <script>
 function cardNews(cls, no, emoji, title, body) {
   return '<div class="cn-card ' + cls + '"><span class="no">CARD ' + no + '</span><span class="emoji">' + emoji + '</span>' +
@@ -78,7 +78,7 @@ DC.start({ title: '3차시 ① 문제 장면 찾고 나의 원칙 세우기', su
     hint: '공감 가는 원칙에 ❤️를 눌러 주세요. 가장 많은 공감을 받은 원칙이 TOP 3에 올라가요.',
     cardHtml: r => '<div class="pr-card">' + DC.nl2br(r.answers.principle) + '</div>',
     extraTop: list => {
-      const mine = list.some(r => r.id === DC.student.id) || DC.student.isTeacher;
+      const mine = list.some(r => r.id === DC.student.id) || DC.canPeek();
       if (!mine || !list.length) return '';
       const top = list.slice().sort((a, b) => likeCount(b.id) - likeCount(a.id) || b.updatedAt - a.updatedAt)
         .filter(r => likeCount(r.id) > 0).slice(0, 3);

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>미래를 여는 디지털 시민 · 2단원</title>
-<link rel="stylesheet" href="common.css?v=2">
+<link rel="stylesheet" href="common.css?v=4">
 <style>
 .step { display: none; }
 .step.active { display: block; }
@@ -48,8 +48,13 @@
       <input type="text" id="inputName" placeholder="홍길동">
       <div class="error-msg" id="loginError"></div>
       <button class="btn" id="loginBtn" onclick="onLogin()">입장하기</button>
-      <button class="btn guest" onclick="onGuest()">🧪 로그인 없이 체험하기</button>
-      <p class="hint" style="margin:8px 0 0;text-align:center">체험 모드에서는 모든 활동을 해 볼 수 있지만 입력한 내용은 저장되지 않아요.</p>
+      <button class="btn guest" onclick="toggleGuest()">🧪 로그인 없이 체험하기</button>
+      <div id="guestBox" style="display:none;margin-top:10px">
+        <label class="field-label" for="guestBan">체험할 반 선택</label>
+        <select id="guestBan" style="width:100%;padding:11px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.95rem"><option value="">불러오는 중...</option></select>
+        <button class="btn guest" style="margin-top:10px" onclick="onGuest()">이 반으로 체험 시작</button>
+      </div>
+      <p class="hint" style="margin:8px 0 0;text-align:center">체험 모드에서는 고른 반 친구들의 글을 볼 수 있지만, 내가 입력한 내용은 저장되지 않아요.</p>
     </div>
   </div>
 
@@ -67,7 +72,7 @@
   </div>
 </div>
 
-<script src="session.js?v=2"></script>
+<script src="session.js?v=4"></script>
 <script>
 const DB_URL = 'https://gwangsu-on-default-rtdb.firebaseio.com';
 const TEACHER_ID = '3000';
@@ -175,8 +180,26 @@ window.onLogin = async function() {
   }
 };
 
+window.toggleGuest = async function() {
+  const box = document.getElementById('guestBox');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  const sel = document.getElementById('guestBan');
+  if (sel.dataset.loaded) return;
+  try {
+    const cfg = await loadCurrentConfig();
+    const roster = await fetch(`${DB_URL}/years/${cfg.year}/students.json`).then(r => r.json()) || {};
+    const bans = [...new Set(Object.values(roster).map(s => s.grade + '-' + s.ban))]
+      .sort((a, b) => { const [ga, ba] = a.split('-').map(Number), [gb, bb] = b.split('-').map(Number); return ga - gb || ba - bb; });
+    sel.innerHTML = '<option value="">반을 골라 주세요</option>' + bans.map(b => { const [g, c] = b.split('-'); return `<option value="${b}">${g}학년 ${c}반</option>`; }).join('');
+    sel.dataset.loaded = '1';
+  } catch (e) { setLoginError('반 목록을 불러오지 못했습니다.'); }
+};
+
 window.onGuest = async function() {
-  const guest = { id: 'guest', name: '체험', isGuest: true };
+  const v = document.getElementById('guestBan').value;
+  if (!v) { setLoginError('체험할 반을 골라 주세요.'); return; }
+  const [grade, ban] = v.split('-').map(Number);
+  const guest = { id: 'guest', name: '체험', isGuest: true, grade, ban };
   setSrStudent(guest);
   try { enterMain(await loadCurrentConfig(), guest); } catch (e) { setLoginError('설정 정보를 불러오지 못했습니다.'); }
 };
@@ -205,7 +228,8 @@ document.getElementById('inputName').addEventListener('keydown', e => {
 });
 
 window.addEventListener('DOMContentLoaded', async function() {
-  const existing = getSrStudent();
+  let existing = getSrStudent();
+  if (existing && existing.isGuest && !existing.grade) { clearSrStudent(); existing = null; }
   try {
     const cfg = await loadCurrentConfig();
     if (existing) {

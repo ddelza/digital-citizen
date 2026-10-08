@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1차시 ② 핵심 개념 탐험 — 디지털 시민</title>
-<link rel="stylesheet" href="common.css?v=2">
+<link rel="stylesheet" href="common.css?v=4">
 <style>
 .panel { display: none; }
 .panel.active { display: block; }
@@ -103,8 +103,8 @@
   <div id="stats"></div>
 </div>
 
-<script src="session.js?v=2"></script>
-<script src="dc.js?v=2"></script>
+<script src="session.js?v=4"></script>
+<script src="dc.js?v=4"></script>
 <script>
 const HW = ['하드웨어', '소프트웨어'], AI = ['규칙 기반', '기계학습 기반'], NET = ['와이파이', '블루투스'];
 const QUIZ = [
@@ -153,7 +153,7 @@ function paintStats(recs) {
 }
 function refreshStats() {
   const box = document.getElementById('stats');
-  if (!mine && !DC.student.isTeacher) {
+  if (!mine && !DC.canPeek()) {
     box.innerHTML = '<div class="dc-locked">🔒 퀴즈를 풀고 저장하면 우리 반 정답률을 볼 수 있어요.</div>'; return;
   }
   DC.get('s1/quiz/' + DC.myBan()).then(paintStats).catch(() => {});

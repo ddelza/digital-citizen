@@ -40,10 +40,11 @@
     if (i >= 0) { q = p.slice(i); p = p.slice(0, i); }
     return DB_URL + '/years/' + DC.cfg.year + '/dcitizen/' + UNIT + '/' + p + '.json' + q;
   };
-  // 체험 모드(로그인 없이 체험하기): 서버에 아무것도 보내지 않고 이 탭의 메모리에만 담는다.
-  // 친구들의 실제 응답도 읽지 않는다(로그인 안 한 사람에게 학생 이름·글이 보이면 안 되므로).
-  // 새로고침하면 사라진다.
+  // 체험 모드(로그인 없이 체험하기): 입장할 때 고른 반 친구들의 실제 글은 읽어서 보여 주지만,
+  // 체험하는 사람의 입력·좋아요·댓글은 서버에 보내지 않고 이 탭의 메모리에만 담는다(새로고침하면 사라짐).
   DC.isGuest = function () { return !!(DC.student && DC.student.isGuest); };
+  // 내 답을 저장하기 전에도 반 친구 글·집계를 볼 수 있는 사람(교사, 체험 모드)
+  DC.canPeek = function () { return !!(DC.student && (DC.student.isTeacher || DC.student.isGuest)); };
   var mem = {};
   function memSplit(p) { return p.split('?')[0].split('/').filter(Boolean); }
   function memGet(p) {
@@ -65,9 +66,19 @@
   var memSeq = 0;
   function guestOp(fn) { return new Promise(function (res) { setTimeout(function () { res(fn()); }, 120); }); }
 
-  DC.get = function (p) {
-    if (DC.isGuest()) return guestOp(function () { return memGet(p); });
+  function overlay(base, top) {
+    if (top === null || top === undefined) return base;
+    if (base === null || base === undefined || typeof base !== 'object' || typeof top !== 'object') return top;
+    Object.keys(top).forEach(function (k) { base[k] = overlay(base[k], top[k]); });
+    return base;
+  }
+  function realGet(p) {
     return fetch(DC.url(p)).then(function (r) { if (!r.ok) throw new Error('불러오기 실패'); return r.json(); });
+  }
+  // 체험 모드의 읽기 = 실제 서버 데이터(선택한 반 친구들 글) 위에 내 임시 입력을 덮어씌운 것
+  DC.get = function (p) {
+    if (DC.isGuest()) return realGet(p).catch(function () { return null; }).then(function (real) { return overlay(real, memGet(p)); });
+    return realGet(p);
   };
   DC.put = function (p, v) {
     if (DC.isGuest()) return guestOp(function () { memSet(p, v); return v; });
@@ -87,7 +98,7 @@
   };
 
   // 반 키 = '학년-반' (예: '1-3'). 학년이 달라도 반 번호가 겹치므로 반드시 학년을 포함한다.
-  DC.myBan = function () { if (DC.student.isGuest) return 'guest'; return DC.student.isTeacher ? TEACHER_BAN : (DC.student.grade + '-' + DC.student.ban); };
+  DC.myBan = function () { if (DC.student.isGuest) return DC.student.grade + '-' + DC.student.ban; return DC.student.isTeacher ? TEACHER_BAN : (DC.student.grade + '-' + DC.student.ban); };
   DC.banLabel = function (b) { if (b === TEACHER_BAN) return '교사 테스트'; var p = String(b).split('-'); return p.length === 2 ? p[0] + '학년 ' + p[1] + '반' : b + '반'; };
 
   // ---------- 페이지 시작 ----------
@@ -97,6 +108,9 @@
     if (opts.needLogin !== false) {
       DC.student = window.requireSrLogin();
       if (!DC.student) return new Promise(function () {});
+      if (DC.student.isGuest && !DC.student.grade) { // 반 선택 기능 이전의 체험 계정 → 다시 반을 고르게 한다
+        window.clearSrStudent(); location.href = 'index.html'; return new Promise(function () {});
+      }
     }
     return fetch(DB_URL + '/config/current.json').then(function (r) { return r.json(); }).then(function (cfg) {
       DC.cfg = cfg || { year: new Date().getFullYear(), sem: 1 };
@@ -107,7 +121,7 @@
           (opts.subtitle ? '<p>' + DC.esc(opts.subtitle) + '</p>' : '') + '</div>' +
           (DC.student ? '<div class="who-banner"><span>✓ ' + DC.esc(window.srWhoLabel(DC.student)) + '</span>' +
             '<div class="links"><a href="index.html">← 활동 목록</a></div></div>' : '') +
-          (DC.isGuest() ? '<div class="dc-guest-bar">🧪 <b>체험 모드</b> — 모든 활동을 해 볼 수 있지만 <b>서버에 저장되지 않아요.</b> 새로고침하거나 페이지를 나가면 입력한 내용이 사라지고, 친구들의 글도 보이지 않아요.</div>' : '');
+          (DC.isGuest() ? '<div class="dc-guest-bar">🧪 <b>체험 모드 · ' + DC.esc(DC.banLabel(DC.myBan())) + '</b> — 친구들의 글은 볼 수 있지만, 내가 쓴 글·좋아요·댓글은 <b>서버에 저장되지 않아요.</b> 새로고침하거나 페이지를 나가면 사라져요.</div>' : '');
       }
       return DC.cfg;
     });
@@ -324,8 +338,8 @@
       var top = document.getElementById(bid + '_top');
       top.innerHTML = opts.extraTop ? opts.extraTop(list) : '';
       var listEl = document.getElementById(bid + '_list');
-      if (opts.requireOwn !== false && !mine && !isT) {
-        listEl.innerHTML = DC.isGuest() ? '<div class="dc-locked">🧪 체험 모드 — 답을 저장해 보면 여기에 게시판 카드가 어떻게 보이는지 확인할 수 있어요. (실제 수업에서는 우리 반 친구들의 글이 함께 보여요)</div>' : '<div class="dc-locked">🔒 내 답을 먼저 저장하면 우리 반 친구들(' + list.length + '명)의 생각을 볼 수 있어요.</div>';
+      if (opts.requireOwn !== false && !mine && !DC.canPeek()) {
+        listEl.innerHTML = '<div class="dc-locked">🔒 내 답을 먼저 저장하면 우리 반 친구들(' + list.length + '명)의 생각을 볼 수 있어요.</div>';
         return;
       }
       if (!list.length) { listEl.innerHTML = '<div class="empty-state">아직 올라온 글이 없어요.</div>'; return; }

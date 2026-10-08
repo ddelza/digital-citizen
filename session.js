@@ -63,7 +63,7 @@
   // who-banner 등에 표시할 이름표. 교사 계정(isTeacher)은 학년/반/번호가 없으므로 따로 처리.
   window.srWhoLabel = function (student) {
     if (!student) return '';
-    if (student.isGuest) return '체험 모드 (저장 안 됨)';
+    if (student.isGuest) return '체험 모드 · ' + student.grade + '학년 ' + student.ban + '반 (저장 안 됨)';
     if (student.isTeacher) return student.name + ' 선생님 (교사 계정)';
     return student.grade + '학년 ' + student.ban + '반 ' + student.num + '번 ' + student.name;
   };
